@@ -5,6 +5,7 @@ Installation
 ------------
 
 ::
+
     $ pip install pprintpp
 
 Usage
@@ -21,9 +22,7 @@ Usage
    and pretty-print them::
 
     $ echo "{'hello': 'world'}" | pypprint
-    {
-        'hello': 'world',
-    }
+    {'hello': 'world'}
 
 3. To monkeypatch ``pprint``::
 
