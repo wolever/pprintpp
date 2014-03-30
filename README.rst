@@ -1,5 +1,5 @@
-``pprintpp`` is a drop-in replacement for ``pprint`` that's actually pretty
-===========================================================================
+``pprintpp``: a drop-in replacement for ``pprint`` that's actually pretty
+=========================================================================
 
 Usage
 -----
