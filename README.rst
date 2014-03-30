@@ -1,6 +1,12 @@
 ``pprintpp``: a drop-in replacement for ``pprint`` that's actually pretty
 =========================================================================
 
+Installation
+------------
+
+::
+    $ pip install pprintpp
+
 Usage
 -----
 
