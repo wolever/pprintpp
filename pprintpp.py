@@ -198,10 +198,14 @@ class PrettyPrinter(object):
             try:
                 self._write_nested_real(sub_objects, oneline_state, typeish,
                                         oneline=True)
-                state.write(oneline_state.stream.getvalue())
-                return
+                oneline_value = oneline_state.stream.getvalue()
+                if "\n" in oneline_value:
+                    oneline_value = None
             except oneline_state.WriteConstrained:
-                pass
+                oneline_value = None
+            if oneline_value is not None:
+                state.write(oneline_value)
+                return
             state.write("\n" + state.get_indent_string())
             self._write_nested_real(sub_objects, state, typeish)
         finally:
@@ -212,9 +216,8 @@ class PrettyPrinter(object):
         indent_str = state.get_indent_string()
         first = True
         joiner = oneline and ", " or ",\n" + indent_str
-        sorted_sub_objects = _sorted(sub_objects)
         if typeish == "dict":
-            for k, v in sorted_sub_objects:
+            for k, v in _sorted(sub_objects):
                 if first:
                     first = False
                 else:
@@ -223,7 +226,9 @@ class PrettyPrinter(object):
                 state.write(": ")
                 self._format(v, state)
         else:
-            for o in sorted_sub_objects:
+            if typeish == "set":
+                sub_objects = _sorted(sub_objects)
+            for o in sub_objects:
                 if first:
                     first = False
                 else:
@@ -295,6 +300,7 @@ class PrettyPrinter(object):
             return
 
         orepr = repr(object)
+        orepr = orepr.replace("\n", "\n" + state.get_indent_string())
         state.s.readable = (
             state.s.readable and
             not orepr.startswith("<")
@@ -328,6 +334,7 @@ class PrettyPrinter(object):
 
 if __name__ == "__main__":
     #sys.exit(console())
+    import numpy as np
     somelist = [1,2,3]
     recursive = []
     recursive.extend([recursive, recursive, recursive])
@@ -336,6 +343,11 @@ if __name__ == "__main__":
         "b": [somelist, somelist],
         "c": (1, ),
         "d": (1,2,3),
+        "np": [
+            "hello",
+            np.array([[1,2],[3,4]]),
+            "world",
+        ],
         "recursive": recursive,
         "z": {
             "very very very long key stuff 1234": {
