@@ -3,7 +3,7 @@
 
 ``pp`` can be installed with::
 
-    $ pip install pp-ez
+    $ pip install pprintpp pp-ez
 
 The ``pp`` package is just an alias for the ``pprintpp`` package (and falls back
 to the ``pprint`` package if ``pprintpp`` isn't available), plus a bit of magic
@@ -29,4 +29,4 @@ available it will fall back to using ``pprint``::
     <module 'pprint' from '.../lib/python2.7/pprint.pyc'>
 
 
-See also: the ``pprint++`` package: https://pypi.python.org/pypi/pprintpp
+See also: ``pprint++``: https://pypi.python.org/pypi/pprintpp
