@@ -8,6 +8,19 @@ Installation
 
     $ pip install pprintpp
 
+The ``pprint++`` source distribution also contains a package called ``pp``, a
+convinient alias for ``pprintpp``. The ``pp`` package is optional, but must be
+installed separately::
+
+    $ pip install pp-ez
+    $ python
+    ...
+    >>> import pp
+    >>> pp(["Hello", "world"])
+    ["Hello", "world"]
+
+For more, see https://pypi.python.org/pypi/pp-ez
+
 Usage
 -----
 
@@ -33,6 +46,17 @@ Usage
 
    Note: the original ``pprint`` will be available with ``import
    pprint_original``.
+
+4. Through the separate ``pp`` module::
+
+    $ pip insatll pp
+    $ python
+    ...
+    >>> import pp
+    >>> pp(["Hello", "world"])
+    ["Hello", "world"]
+
+   For more, see https://pypi.python.org/pypi/pp-ez
 
 Why is it prettier?
 -------------------
