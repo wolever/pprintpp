@@ -1,4 +1,4 @@
-``pprintpp``: a drop-in replacement for ``pprint`` that's actually pretty
+``pprint++``: a drop-in replacement for ``pprint`` that's actually pretty
 =========================================================================
 
 Installation
@@ -11,7 +11,7 @@ Installation
 Usage
 -----
 
-``pprintpp`` can be used in three ways:
+``pprint++`` can be used in three ways:
 
 1. As a regular module::
 
@@ -37,13 +37,13 @@ Usage
 Why is it prettier?
 -------------------
 
-Unlike ``pprint``, ``pprintpp`` strives to emit a readable, largely
+Unlike ``pprint``, ``pprint++`` strives to emit a readable, largely
 PEP8-complient, representation of its input.
 
 It also has explicit support for: the ``collections`` module (``defaultdict``
 and ``Counter``) and ``numpy`` arrays.
 
-**Note**: ``pprintpp`` is still under development, so the format *will* change
+**Note**: ``pprint++`` is still under development, so the format *will* change
 and improve over time.
 
 Example
