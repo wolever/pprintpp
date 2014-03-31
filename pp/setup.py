@@ -13,7 +13,7 @@ except IOError:
     long_description = "See https://github.com/wolever/pprintpp"
 
 setup(
-    name="pp",
+    name="pp-ez",
     version="0.1.0",
     url="https://github.com/wolever/pprintpp",
     author="David Wolever",

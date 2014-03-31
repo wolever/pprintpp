@@ -5,8 +5,8 @@
 
     $ pip install pp-ez
 
-The ``pp`` package is just an alias for the ``pprintpp`` module (and falls back
-to the ``pprint`` module if ``pprintpp`` isn't available), plus a bit of magic
+The ``pp`` package is just an alias for the ``pprintpp`` package (and falls back
+to the ``pprint`` package if ``pprintpp`` isn't available), plus a bit of magic
 so it can be called directly::
 
     >>> import pp
@@ -19,7 +19,7 @@ so it can be called directly::
     >>> pp.pformat([1, 2, 3])
     '[1, 2, 3]'
 
-By default, ``pp`` tries to use the ``pprintpp`` module, but if that is not
+By default, ``pp`` tries to use the ``pprintpp`` package, but if that is not
 available it will fall back to using ``pprint``::
 
     >>> import pp
@@ -27,3 +27,6 @@ available it will fall back to using ``pprint``::
     <module 'pp' (pp_magic_module with pprint_mod='pprint')>
     >>> pp.pprint_mod
     <module 'pprint' from '.../lib/python2.7/pprint.pyc'>
+
+
+See also: the ``pprint++`` package: https://pypi.python.org/pypi/pprintpp
