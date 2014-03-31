@@ -2,6 +2,7 @@ import os
 import ast
 import sys
 import warnings
+from collections import defaultdict, Counter
 
 from cStringIO import StringIO
 
@@ -176,14 +177,17 @@ class PrettyPrinter(object):
         self._format(object, state)
         return state.s.readable and not state.s.recursive
 
-    _listish_reprs = {
+    _container_reprs = {
+        dict.__repr__: ("dict", "{", "}", "{}"),
         list.__repr__: ("list", "[", "]", "[]"),
         tuple.__repr__: ("tuple", "(", ")", "()"),
         set.__repr__: ("set", "set([", "])", "set()"),
         frozenset.__repr__: ("set", "frozenset([", "])", "frozenset()"),
+        Counter.__repr__: ("dict", "Counter({", "})", "Counter()"),
+        defaultdict.__repr__: ("dict", None, "})", None),
     }
 
-    def _format_nested_objects(self, object, sub_objects, state, typeish=None):
+    def _format_nested_objects(self, object, state, typeish=None):
         objid = id(object)
         state.level += 1
         state.context[objid] = 1
@@ -196,7 +200,7 @@ class PrettyPrinter(object):
                 state.max_width - state.s.cur_line_length - 3
             )
             try:
-                self._write_nested_real(sub_objects, oneline_state, typeish,
+                self._write_nested_real(object, oneline_state, typeish,
                                         oneline=True)
                 oneline_value = oneline_state.stream.getvalue()
                 if "\n" in oneline_value:
@@ -207,17 +211,17 @@ class PrettyPrinter(object):
                 state.write(oneline_value)
                 return
             state.write("\n" + state.get_indent_string())
-            self._write_nested_real(sub_objects, state, typeish)
+            self._write_nested_real(object, state, typeish)
         finally:
             state.level -= 1
         state.write(state.get_indent_string())
 
-    def _write_nested_real(self, sub_objects, state, typeish, oneline=False):
+    def _write_nested_real(self, object, state, typeish, oneline=False):
         indent_str = state.get_indent_string()
         first = True
         joiner = oneline and ", " or ",\n" + indent_str
         if typeish == "dict":
-            for k, v in _sorted(sub_objects):
+            for k, v in _sorted(object.items()):
                 if first:
                     first = False
                 else:
@@ -227,14 +231,14 @@ class PrettyPrinter(object):
                 self._format(v, state)
         else:
             if typeish == "set":
-                sub_objects = _sorted(sub_objects)
-            for o in sub_objects:
+                object = _sorted(object)
+            for o in object:
                 if first:
                     first = False
                 else:
                     state.write(joiner)
                 self._format(o, state)
-        if oneline and typeish == "tuple" and len(sub_objects) == 1:
+        if oneline and typeish == "tuple" and len(object) == 1:
             state.write(", ")
         elif not oneline:
             state.write(",\n")
@@ -251,28 +255,22 @@ class PrettyPrinter(object):
             return
 
         typ = type(object)
-        r = getattr(typ, "__repr__", None)
-        if r is dict.__repr__:
-            if not len(object):
-                write('{}')
-                return
-            write('{')
-            self._format_nested_objects(object, object.items(),
-                                        state, typeish="dict")
-            write("}")
-            return
-
-        opener_closer_empty = self._listish_reprs.get(r)
+        r = typ.__repr__
+        opener_closer_empty = self._container_reprs.get(r)
         if opener_closer_empty is not None:
             typeish, opener, closer, empty = opener_closer_empty
-            length = len(object)
+            if r == defaultdict.__repr__:
+                factory_repr = object.default_factory
+                opener = "defaultdict(%r, {" %(factory_repr, )
+                empty = opener + closer
 
+            length = len(object)
             if length == 0:
                 write(empty)
                 return
 
             write(opener)
-            self._format_nested_objects(object, object, state, typeish=typeish)
+            self._format_nested_objects(object, state, typeish=typeish)
             write(closer)
             return
 
@@ -341,8 +339,18 @@ if __name__ == "__main__":
     pprint({
         "a": {"a": "b"},
         "b": [somelist, somelist],
-        "c": (1, ),
-        "d": (1,2,3),
+        "c": [
+            (1, ),
+            (1,2,3),
+        ],
+        "counter": [
+            Counter(),
+            Counter("asdfasdfasdf"),
+        ],
+        "dd": [
+            defaultdict(int, {}),
+            defaultdict(int, {"foo": 42}),
+        ],
         "np": [
             "hello",
             np.array([[1,2],[3,4]]),
