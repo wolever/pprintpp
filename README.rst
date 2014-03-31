@@ -47,9 +47,9 @@ Usage
    Note: the original ``pprint`` will be available with ``import
    pprint_original``.
 
-4. Through the separate ``pp`` module::
+4. Through the separate ``pp`` package::
 
-    $ pip insatll pp
+    $ pip insatll pp-ez
     $ python
     ...
     >>> import pp
