@@ -49,7 +49,7 @@ Usage
 
 4. Through the separate ``pp`` package::
 
-    $ pip insatll pp-ez
+    $ pip install pp-ez
     $ python
     ...
     >>> import pp
@@ -62,7 +62,7 @@ Why is it prettier?
 -------------------
 
 Unlike ``pprint``, ``pprint++`` strives to emit a readable, largely
-PEP8-complient, representation of its input.
+PEP8-compliant, representation of its input.
 
 It also has explicit support for: the ``collections`` module (``defaultdict``
 and ``Counter``) and ``numpy`` arrays.
