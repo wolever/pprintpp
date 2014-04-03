@@ -65,7 +65,19 @@ Unlike ``pprint``, ``pprint++`` strives to emit a readable, largely
 PEP8-compliant, representation of its input.
 
 It also has explicit support for: the ``collections`` module (``defaultdict``
-and ``Counter``) and ``numpy`` arrays.
+and ``Counter``) and ``numpy`` arrays:
+
+.. code:: pycon
+
+    >>> import numpy as np
+    >>> from collections import defaultdict, Counter
+    >>> pprint([np.array([[1,2],[3,4]]), defaultdict(int, {"foo": 1}), Counter("aaabbc")])
+    [
+        array([[1, 2],
+               [3, 4]]),
+        defaultdict(<type 'int'>, {'foo': 1}),
+        Counter({'a': 3, 'b': 2, 'c': 1}),
+    ]
 
 Unicode characters, when possible, will be printed un-escaped. This is done by
 checking both the output stream's encoding (defaulting to ``utf-8``) and the
