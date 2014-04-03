@@ -8,18 +8,6 @@ Installation
 
     $ pip install pprintpp
 
-The ``pprint++`` source distribution also contains a package called ``pp``, a
-convinient alias for ``pprintpp``. The ``pp`` package is optional, but must be
-installed separately::
-
-    $ pip install pp-ez
-    $ python
-    ...
-    >>> import pp
-    >>> pp(["Hello", "world"])
-    ["Hello", "world"]
-
-For more, see https://pypi.python.org/pypi/pp-ez
 
 Usage
 -----
@@ -176,3 +164,26 @@ Without ``printpp``::
               'favourites_count': 20,
               'id_str': '6253282',
               'profile_link_color': '0094C2'}}
+
+Usability Protip
+~~~~~~~~~~~~~~~~
+
+For bonus code aesthetics, I like to use this module as such::
+
+    >>> from pprintpp import pprintpp as pp
+    >>> pp(...)
+    
+To that end, I also created a wrapper alias module named ``pp``
+(under the ``pp-ez`` PyPI package) which is a convenient shortcut for ``pprintpp``
+and is immediately callable on import!
+
+::
+
+    $ pip install pp-ez
+    $ python
+    ...
+    >>> import pp
+    >>> pp(["Hello", "world"])
+    ["Hello", "world"]
+
+For more, see https://pypi.python.org/pypi/pp-ez
