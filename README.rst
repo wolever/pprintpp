@@ -173,8 +173,8 @@ For bonus code aesthetics, I like to use this module as such::
     >>> from pprintpp import pprintpp as pp
     >>> pp(...)
     
-To that end, I also created a shell module called ``pp``
-(under the ``pp-ez`` PyPI package) which is a convenient alias for ``pprintpp``
+To that end, I also created a wrapper alias module named ``pp``
+(under the ``pp-ez`` PyPI package) which is a convenient shortcut for ``pprintpp``
 and is immediately callable on import!
 
 ::
