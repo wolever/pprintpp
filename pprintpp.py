@@ -1,16 +1,64 @@
+import io
 import os
 import ast
 import sys
 import warnings
+import unicodedata
 from collections import defaultdict, Counter
-
-from cStringIO import StringIO
 
 __all__ = [
     "pprint", "pformat", "isreadable", "isrecursive", "saferepr",
     "PrettyPrinter",
 ]
 
+# pprintpp will make an attempt to print as many unicode characters as is
+# safely possible. It will use the character category along with this table to
+# determine whether or not it is safe to print a character. In this context,
+# "safety" is defined as "the character will appear visually distinct" -
+# combining characters, spaces, and other things which could be visually
+# ambiguous are repr'd, others will be printed. I made this table mostly by
+# hand, mostly guessing, so please file bugs.
+# Source: http://www.unicode.org/reports/tr44/#GC_Values_Table
+unicode_printable_categories = {
+    "Lu": 1, # Uppercase_Letter	an uppercase letter
+    "Ll": 1, # Lowercase_Letter	a lowercase letter
+    "Lt": 1, # Titlecase_Letter	a digraphic character, with first part uppercase
+    "LC": 1, # Cased_Letter	Lu | Ll | Lt
+    "Lm": 0, # Modifier_Letter	a modifier letter
+    "Lo": 1, # Other_Letter	other letters, including syllables and ideographs
+    "L":  1, # Letter	Lu | Ll | Lt | Lm | Lo
+    "Mn": 0, # Nonspacing_Mark	a nonspacing combining mark (zero advance width)
+    "Mc": 0, # Spacing_Mark	a spacing combining mark (positive advance width)
+    "Me": 0, # Enclosing_Mark	an enclosing combining mark
+    "M":  1, # Mark	Mn | Mc | Me
+    "Nd": 1, # Decimal_Number	a decimal digit
+    "Nl": 1, # Letter_Number	a letterlike numeric character
+    "No": 1, # Other_Number	a numeric character of other type
+    "N":  1, # Number	Nd | Nl | No
+    "Pc": 1, # Connector_Punctuation	a connecting punctuation mark, like a tie
+    "Pd": 1, # Dash_Punctuation	a dash or hyphen punctuation mark
+    "Ps": 1, # Open_Punctuation	an opening punctuation mark (of a pair)
+    "Pe": 1, # Close_Punctuation	a closing punctuation mark (of a pair)
+    "Pi": 1, # Initial_Punctuation	an initial quotation mark
+    "Pf": 1, # Final_Punctuation	a final quotation mark
+    "Po": 1, # Other_Punctuation	a punctuation mark of other type
+    "P":  1, # Punctuation	Pc | Pd | Ps | Pe | Pi | Pf | Po
+    "Sm": 1, # Math_Symbol	a symbol of mathematical use
+    "Sc": 1, # Currency_Symbol	a currency sign
+    "Sk": 1, # Modifier_Symbol	a non-letterlike modifier symbol
+    "So": 1, # Other_Symbol	a symbol of other type
+    "S":  1, # Symbol	Sm | Sc | Sk | So
+    "Zs": 0, # Space_Separator	a space character (of various non-zero widths)
+    "Zl": 0, # Line_Separator	U+2028 LINE SEPARATOR only
+    "Zp": 0, # Paragraph_Separator	U+2029 PARAGRAPH SEPARATOR only
+    "Z":  1, # Separator	Zs | Zl | Zp
+    "Cc": 0, # Control	a C0 or C1 control code
+    "Cf": 0, # Format	a format control character
+    "Cs": 0, # Surrogate	a surrogate code point
+    "Co": 0, # Private_Use	a private-use character
+    "Cn": 0, # Unassigned	a reserved unassigned code point or a noncharacter
+    "C":  0, # Other	Cc | Cf | Cs | Co | Cn
+}
 
 def pprint(object, stream=None, indent=4, width=80, depth=None):
     """Pretty-print a Python object to a stream [default is sys.stdout]."""
@@ -126,6 +174,12 @@ class PPrintState(object):
     def get_indent_string(self):
         return (self.level * self.indent) * " "
 
+    def get_stream_encoding(self):
+        default = "utf-8"
+        try:
+            return self.stream.encoding or default
+        except AttributeError:
+            return default
 
 
 class PrettyPrinter(object):
@@ -161,7 +215,7 @@ class PrettyPrinter(object):
         state.write("\n")
 
     def pformat(self, object, state=None):
-        sio = StringIO()
+        sio = io.BytesIO()
         state = state or self.get_default_state()
         state = state.replace(stream=sio)
         self._format(object, state)
@@ -195,7 +249,7 @@ class PrettyPrinter(object):
             # First, try to fit everything on one line. For simplicity, assume
             # that it takes three characters to close the object (ex, `]),`)
             oneline_state = state.clone(clone_shared=True)
-            oneline_state.stream = StringIO()
+            oneline_state.stream = io.BytesIO()
             oneline_state.write_constrain = (
                 state.max_width - state.s.cur_line_length - 3
             )
@@ -274,12 +328,12 @@ class PrettyPrinter(object):
             write(closer)
             return
 
-        is_uni = r == unicode.__repr__
-        if r == str.__repr__ or is_uni:
-            if 'locale' not in sys.modules:
-                write(repr(object))
-                return
+        if r == str.__repr__:
+            write(repr(object))
+            return
 
+        if r == unicode.__repr__:
+            encoding = state.get_stream_encoding()
             if "'" in object and '"' not in object:
                 quote = '"'
                 quotes = {'"': '\\"'}
@@ -287,13 +341,17 @@ class PrettyPrinter(object):
                 quote = "'"
                 quotes = {"'": "\\'"}
             qget = quotes.get
-            pslice = is_uni and 2 or 1
-            write(is_uni and 'u' or '' + quote)
+            unicat_get = unicodedata.category
+            write('u' + quote)
             for char in object:
-                if char.isalpha():
-                    write(char)
-                else:
-                    write(qget(char) or repr(char)[pslice:-1])
+                cat = unicat_get(char)
+                if unicode_printable_categories.get(cat):
+                    try:
+                        write(char.encode(encoding))
+                        continue
+                    except UnicodeEncodeError:
+                        pass
+                write(qget(char) or repr(char)[2:-1])
             write(quote)
             return
 
@@ -356,6 +414,7 @@ if __name__ == "__main__":
             np.array([[1,2],[3,4]]),
             "world",
         ],
+        u"u": ["a", u"\u1234", "b"],
         "recursive": recursive,
         "z": {
             "very very very long key stuff 1234": {
@@ -365,3 +424,13 @@ if __name__ == "__main__":
             "aldksfj alskfj askfjas fkjasdlkf jasdlkf ajslfjas": ["asdf"] * 10,
         },
     })
+    pprint(u"\xe9e\u0301")
+    uni_safe = u"\xe9 \u6f02 \u0e4f \u2661"
+    uni_unsafe = u"\u200a \u0301 \n"
+    unistr = uni_safe + " --- " + uni_unsafe
+    sys.modules.pop("locale", None)
+    pprint(unistr)
+    stream = io.BytesIO()
+    stream.encoding = "ascii"
+    pprint(unistr, stream=stream)
+    print stream.getvalue()

@@ -67,13 +67,40 @@ PEP8-complient, representation of its input.
 It also has explicit support for: the ``collections`` module (``defaultdict``
 and ``Counter``) and ``numpy`` arrays.
 
+Unicode characters, when possible, will be printed un-escaped. This is done by
+checking both the output stream's encoding (defaulting to ``utf-8``) and the
+character's unicode category. An effort is made to print only characters which
+will be visually unambiguous: letters and numbers will be printed un-escaped,
+spaces, combining characters, and control characters will be escaped:
+
+.. code:: pycon
+
+    >>> unistr = u"\xe9e\u0301"
+    >>> print unistr
+    éé
+    >>> pprint(unistr)
+    u'ée\u0301'
+
+The output stream's encoding will be considered too:
+
+.. code:: pycon
+
+    >>> import io
+    >>> stream = io.BytesIO()
+    >>> stream.encoding = "ascii"
+    >>> pprint(unistr, stream=stream)
+    >>> print stream.getvalue()
+    u'\xe9e\u0301'
+
 **Note**: ``pprint++`` is still under development, so the format *will* change
 and improve over time.
 
 Example
 ~~~~~~~
 
-With ``printpp``::
+With ``printpp``:
+
+.. code:: pycon
 
     >>> import pprintpp
     >>> pprintpp.pprint(["Hello", np.array([[1,2],[3,4]])])
