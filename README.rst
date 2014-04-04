@@ -46,6 +46,33 @@ Usage
 
    For more, see https://pypi.python.org/pypi/pp-ez
 
+Usability Protips
+-----------------
+
+``pp``
+~~~~~~
+
+For bonus code aesthetics, ``pprintpp.pprint`` can be imported as ``pp``:
+
+.. code:: pycon
+
+    >>> from pprintpp import pprint as pp
+    >>> pp(...)
+
+And if that is just too many letters, the ``pp-ez`` package can be installed
+from PyPI, ensuring that pretty-printing is never more than an ``import pp``
+away::
+
+    $ pip install pp-ez
+    $ python
+    ...
+    >>> import pp
+    >>> pp(["Hello", "world"])
+    ["Hello", "world"]
+
+For more, see https://pypi.python.org/pypi/pp-ez
+
+
 Why is it prettier?
 -------------------
 
@@ -164,26 +191,3 @@ Without ``printpp``::
               'favourites_count': 20,
               'id_str': '6253282',
               'profile_link_color': '0094C2'}}
-
-Usability Protip
-~~~~~~~~~~~~~~~~
-
-For bonus code aesthetics, I like to use this module as such::
-
-    >>> from pprintpp import pprintpp as pp
-    >>> pp(...)
-    
-To that end, I also created a wrapper alias module named ``pp``
-(under the ``pp-ez`` PyPI package) which is a convenient shortcut for ``pprintpp``
-and is immediately callable on import!
-
-::
-
-    $ pip install pp-ez
-    $ python
-    ...
-    >>> import pp
-    >>> pp(["Hello", "world"])
-    ["Hello", "world"]
-
-For more, see https://pypi.python.org/pypi/pp-ez
