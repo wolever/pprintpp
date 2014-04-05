@@ -2,7 +2,7 @@
     * Fix bug in printing Unicode strings when locale is imported
     * Improve Unicode printing so a wider range of Unicode characters will be
       printed directly.
-    
+
 
 0.1.2 (2014-03-30)
     * Add support for collections.Counter and collections.defaultdict
