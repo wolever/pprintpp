@@ -11,7 +11,7 @@ __all__ = [
     "PrettyPrinter",
 ]
 
-# pprintpp will make an attempt to print as many unicode characters as is
+# pprintpp will make an attempt to print as many Unicode characters as is
 # safely possible. It will use the character category along with this table to
 # determine whether or not it is safe to print a character. In this context,
 # "safety" is defined as "the character will appear visually distinct" -

@@ -1,6 +1,6 @@
 0.1.3 (2014-04-03)
-    * Fix bug in printing unicode strings when locale is imported
-    * Improve unicode printing so a wider range of unocode characters will be
+    * Fix bug in printing Unicode strings when locale is imported
+    * Improve Unicode printing so a wider range of Unicode characters will be
       printed directly.
     
 
