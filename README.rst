@@ -96,7 +96,7 @@ and ``Counter``) and ``numpy`` arrays:
 
 Unicode characters, when possible, will be printed un-escaped. This is done by
 checking both the output stream's encoding (defaulting to ``utf-8``) and the
-character's unicode category. An effort is made to print only characters which
+character's Unicode category. An effort is made to print only characters which
 will be visually unambiguous: letters and numbers will be printed un-escaped,
 spaces, combining characters, and control characters will be escaped:
 
