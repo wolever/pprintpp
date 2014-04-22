@@ -3,13 +3,18 @@
 
 .. image:: https://travis-ci.org/wolever/pprintpp.svg?branch=master   :target: https://travis-ci.org/wolever/pprintpp
 
+Now with Python 3 support!
+
 Installation
 ------------
 
-::
+
+``pprint++`` can be installed with Python 2 or Python 3 using ``pip`` or
+``easy_install``::
 
     $ pip install pprintpp
-
+    - OR -
+    $ easy_install pprintpp
 
 Usage
 -----

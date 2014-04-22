@@ -1,9 +1,12 @@
 ``pp``: an alias for pprint++
 =============================
 
-``pp`` can be installed with::
+``pp`` can be installed with Python 2 or Python 3 using ``pip`` or
+``easy_install``::
 
     $ pip install pprintpp pp-ez
+    - OR -
+    $ easy_install pprintpp pp-ez
 
 The ``pp`` package is just an alias for the ``pprintpp`` package (and falls back
 to the ``pprint`` package if ``pprintpp`` isn't available), plus a bit of magic

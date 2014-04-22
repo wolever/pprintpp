@@ -14,7 +14,7 @@ except IOError:
 
 setup(
     name="pprintpp",
-    version="0.1.3",
+    version="0.2.0",
     url="https://github.com/wolever/pprintpp",
     author="David Wolever",
     author_email="david@wolever.net",
@@ -36,6 +36,8 @@ setup(
         Natural Language :: English
         Operating System :: OS Independent
         Programming Language :: Python
+        Programming Language :: Python :: 2
+        Programming Language :: Python :: 3
         Topic :: Software Development
         Topic :: Utilities
     """.split("\n") if x.strip() ],
