@@ -1,13 +1,14 @@
+from __future__ import print_function
 import pp
 
 pp(["hello", "world"])
 
 pp.pprint("stuff")
 
-print pp.pformat("asdf")
+print(pp.pformat("asdf"))
 
-print pp.fmt("stuff")
+print(pp.fmt("stuff"))
 
-print dir(pp)
+print(dir(pp))
 
-print repr(pp)
+print(repr(pp))
