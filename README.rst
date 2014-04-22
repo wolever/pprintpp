@@ -1,7 +1,7 @@
 ``pprint++``: a drop-in replacement for ``pprint`` that's actually pretty
 =========================================================================
 
-.. image:: https://travis-ci.org/hugovk/pprintpp.svg?branch=master   :target: https://travis-ci.org/hugovk/pprintpp
+.. image:: https://travis-ci.org/wolever/pprintpp.svg?branch=master   :target: https://travis-ci.org/wolever/pprintpp
 
 Installation
 ------------
