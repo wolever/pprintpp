@@ -1,24 +1,19 @@
 language: python
 
 python:
-  - 2.6
   - 2.7
-  - 3.2
   - 3.3
   - pypy
+  - 2.6
+  - 3.2
+
+install:
+  - pip install --use-mirrors -r test-requires.txt
 
 script:
-  - python pp/test.py
-
-after_success:
-  - pip install pep8 pyflakes
-  - pep8 pp/*.py
-  - pyflakes pp/*.py
-  - pep8 *.py
-  - pyflakes *.py
+  - python test.py
 
 matrix:
   allow_failures:
     - python: 3.2
     - python: 3.3
-    - python: pypy
