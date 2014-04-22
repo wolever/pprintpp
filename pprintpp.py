@@ -17,7 +17,6 @@ PY3 = sys.version_info >= (3, 0, 0)
 BytesType = bytes
 TextType = str if PY3 else unicode
 u_prefix = '' if PY3 else 'u'
-u_prefixlen = 1 if PY3 else 2
 
 class TextIO(io.TextIOWrapper):
     def __init__(self, encoding=None):
@@ -78,6 +77,11 @@ unicode_printable_categories = {
 }
 
 def _ascii_repr(i):
+    """ Returns the ascii-safe repr of ascii codepoint ``i``.
+
+        The explicit check for ``>= 0x7f`` is necessary to ensure that
+        non-ascii characters will be backslash escaped on Python 3.
+        """
     if i >= 0x7f:
         return "\\x%02x" %(i, )
     return repr(chr(i))[1:-1]
