@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import io
 import os
 import ast
@@ -10,6 +12,20 @@ __all__ = [
     "pprint", "pformat", "isreadable", "isrecursive", "saferepr",
     "PrettyPrinter",
 ]
+
+PY3 = sys.version_info >= (3, 0, 0)
+BytesType = bytes
+TextType = str if PY3 else unicode
+u_prefix = '' if PY3 else 'u'
+
+class TextIO(io.TextIOWrapper):
+    def __init__(self, encoding=None):
+        io.TextIOWrapper.__init__(self, io.BytesIO(), encoding=encoding)
+
+    def getvalue(self):
+        self.flush()
+        return self.buffer.getvalue().decode(self.encoding)
+
 
 # pprintpp will make an attempt to print as many Unicode characters as is
 # safely possible. It will use the character category along with this table to
@@ -84,7 +100,7 @@ def isrecursive(object):
 
 def _sorted(iterable):
     with warnings.catch_warnings():
-        if sys.py3kwarning:
+        if getattr(sys, "py3kwarning", False):
             warnings.filterwarnings("ignore", "comparing unequal types "
                                     "not supported", DeprecationWarning)
         return sorted(iterable)
@@ -96,9 +112,9 @@ def console(argv=None):
         name = argv[0]
         if name.startswith("/"):
             name = os.path.basename(name)
-        print "Usage: %s" %(argv[0], )
-        print
-        print "Pipe Python literals into %s to pretty-print them" %(argv[0], )
+        print("Usage: %s" %(argv[0], ))
+        print()
+        print("Pipe Python literals into %s to pretty-print them" %(argv[0], ))
         return 1
     obj = ast.literal_eval(sys.stdin.read().strip())
     pprint(obj)
@@ -158,28 +174,23 @@ class PPrintState(object):
             new.s = self.s.clone()
         return new
 
-    def write(self, bytes):
+    def write(self, data):
         if self.write_constrain is not None:
-            self.write_constrain -= len(bytes)
+            self.write_constrain -= len(data)
             if self.write_constrain < 0:
                 raise self.WriteConstrained
 
-        self.stream.write(bytes)
-        nl_idx = bytes.rfind("\n")
+        if isinstance(data, BytesType):
+            data = data.decode("ascii")
+        self.stream.write(data)
+        nl_idx = data.rfind("\n")
         if nl_idx < 0:
-            self.s.cur_line_length += len(bytes)
+            self.s.cur_line_length += len(data)
         else:
-            self.s.cur_line_length = len(bytes) - (nl_idx + 1)
+            self.s.cur_line_length = len(data) - (nl_idx + 1)
 
     def get_indent_string(self):
         return (self.level * self.indent) * " "
-
-    def get_stream_encoding(self):
-        default = "utf-8"
-        try:
-            return self.stream.encoding or default
-        except AttributeError:
-            return default
 
 
 class PrettyPrinter(object):
@@ -215,7 +226,7 @@ class PrettyPrinter(object):
         state.write("\n")
 
     def pformat(self, object, state=None):
-        sio = io.BytesIO()
+        sio = TextIO()
         state = state or self.get_default_state()
         state = state.replace(stream=sio)
         self._format(object, state)
@@ -249,7 +260,7 @@ class PrettyPrinter(object):
             # First, try to fit everything on one line. For simplicity, assume
             # that it takes three characters to close the object (ex, `]),`)
             oneline_state = state.clone(clone_shared=True)
-            oneline_state.stream = io.BytesIO()
+            oneline_state.stream = TextIO()
             oneline_state.write_constrain = (
                 state.max_width - state.s.cur_line_length - 3
             )
@@ -328,12 +339,11 @@ class PrettyPrinter(object):
             write(closer)
             return
 
-        if r == str.__repr__:
+        if r == BytesType.__repr__:
             write(repr(object))
             return
 
-        if r == unicode.__repr__:
-            encoding = state.get_stream_encoding()
+        if r == TextType.__repr__:
             if "'" in object and '"' not in object:
                 quote = '"'
                 quotes = {'"': '\\"'}
@@ -342,12 +352,12 @@ class PrettyPrinter(object):
                 quotes = {"'": "\\'"}
             qget = quotes.get
             unicat_get = unicodedata.category
-            write('u' + quote)
+            write(u_prefix + quote)
             for char in object:
                 cat = unicat_get(char)
                 if unicode_printable_categories.get(cat):
                     try:
-                        write(char.encode(encoding))
+                        write(char)
                         continue
                     except UnicodeEncodeError:
                         pass
@@ -390,7 +400,7 @@ class PrettyPrinter(object):
 
 if __name__ == "__main__":
     #sys.exit(console())
-    import numpy as np
+    #import numpy as np
     somelist = [1,2,3]
     recursive = []
     recursive.extend([recursive, recursive, recursive])
@@ -411,7 +421,7 @@ if __name__ == "__main__":
         ],
         "np": [
             "hello",
-            np.array([[1,2],[3,4]]),
+            #np.array([[1,2],[3,4]]),
             "world",
         ],
         u"u": ["a", u"\u1234", "b"],
@@ -430,7 +440,6 @@ if __name__ == "__main__":
     unistr = uni_safe + " --- " + uni_unsafe
     sys.modules.pop("locale", None)
     pprint(unistr)
-    stream = io.BytesIO()
-    stream.encoding = "ascii"
+    stream = TextIO(encoding="ascii")
     pprint(unistr, stream=stream)
-    print stream.getvalue()
+    print(stream.getvalue())
