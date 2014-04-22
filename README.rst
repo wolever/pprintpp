@@ -1,7 +1,8 @@
 ``pprint++``: a drop-in replacement for ``pprint`` that's actually pretty
 =========================================================================
 
-.. image:: https://travis-ci.org/wolever/pprintpp.svg?branch=master   :target: https://travis-ci.org/wolever/pprintpp
+.. image:: https://travis-ci.org/wolever/pprintpp.svg?branch=master
+    :target: https://travis-ci.org/wolever/pprintpp
 
 Now with Python 3 support!
 
