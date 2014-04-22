@@ -17,6 +17,7 @@ PY3 = sys.version_info >= (3, 0, 0)
 BytesType = bytes
 TextType = str if PY3 else unicode
 u_prefix = '' if PY3 else 'u'
+u_prefixlen = 1 if PY3 else 2
 
 class TextIO(io.TextIOWrapper):
     def __init__(self, encoding=None):
@@ -75,6 +76,16 @@ unicode_printable_categories = {
     "Cn": 0, # Unassigned	a reserved unassigned code point or a noncharacter
     "C":  0, # Other	Cc | Cf | Cs | Co | Cn
 }
+
+def _ascii_repr(i):
+    if i >= 0x7f:
+        return "\\x%02x" %(i, )
+    return repr(chr(i))[1:-1]
+
+ascii_repr = dict(
+    (i, _ascii_repr(i))
+    for i in range(255)
+)
 
 def pprint(object, stream=None, indent=4, width=80, depth=None):
     """Pretty-print a Python object to a stream [default is sys.stdout]."""
@@ -351,6 +362,7 @@ class PrettyPrinter(object):
                 quote = "'"
                 quotes = {"'": "\\'"}
             qget = quotes.get
+            ascii_repr_get = ascii_repr.get
             unicat_get = unicodedata.category
             write(u_prefix + quote)
             for char in object:
@@ -361,7 +373,15 @@ class PrettyPrinter(object):
                         continue
                     except UnicodeEncodeError:
                         pass
-                write(qget(char) or repr(char)[2:-1])
+                is_qt = qget(char)
+                if is_qt is not None:
+                    write(is_qt)
+                    continue
+                ord_char = ord(char)
+                if ord_char > 0xff:
+                    write(r"\u%04x" %(ord_char, ))
+                else:
+                    write(ascii_repr_get(ord_char))
             write(quote)
             return
 
@@ -399,8 +419,14 @@ class PrettyPrinter(object):
 
 
 if __name__ == "__main__":
-    #sys.exit(console())
-    #import numpy as np
+    try:
+        import numpy as np
+    except ImportError:
+        class np(object):
+            @staticmethod
+            def array(o):
+                return o
+
     somelist = [1,2,3]
     recursive = []
     recursive.extend([recursive, recursive, recursive])
