@@ -52,9 +52,20 @@ class TestPPrint(PPrintppTestBase):
         param("safe", uni_safe, "%s'%s'" %(p.u_prefix, uni_safe)),
         param("unsafe", uni_unsafe, slashed(uni_unsafe)),
         param("encoding-aware", uni_safe, slashed(uni_safe), encoding="ascii"),
+        param("high-end-chars", u"\U0002F9B2", slashed(u"\U0002F9B2"), encoding="ascii"),
     ])
     def test_unicode(self, name, input, expected, encoding="utf-8"):
         stream = p.TextIO(encoding=encoding)
+        p.pprint(input, stream=stream)
+        assert_equal(stream.getvalue().rstrip("\n"), expected)
+
+    @parameterized([
+        param("both", "'\"", u"'\\'\"'"),
+        param("single", "'", u'"\'"'),
+        param("double", '"', u"'\"'"),
+    ])
+    def test_quotes(self, name, input, expected):
+        stream = p.TextIO()
         p.pprint(input, stream=stream)
         assert_equal(stream.getvalue().rstrip("\n"), expected)
 

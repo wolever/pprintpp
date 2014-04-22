@@ -17,6 +17,12 @@ PY3 = sys.version_info >= (3, 0, 0)
 BytesType = bytes
 TextType = str if PY3 else unicode
 u_prefix = '' if PY3 else 'u'
+if PY3:
+    _ascii = globals()["__builtins__"]["ascii"]
+    chr_to_ascii = lambda x: _ascii(x)[1:-1]
+    unichr = chr
+else:
+    chr_to_ascii = lambda x: repr(x)[2:-1]
 
 class TextIO(io.TextIOWrapper):
     def __init__(self, encoding=None):
@@ -76,18 +82,8 @@ unicode_printable_categories = {
     "C":  0, # Other	Cc | Cf | Cs | Co | Cn
 }
 
-def _ascii_repr(i):
-    """ Returns the ascii-safe repr of ascii codepoint ``i``.
-
-        The explicit check for ``>= 0x7f`` is necessary to ensure that
-        non-ascii characters will be backslash escaped on Python 3.
-        """
-    if i >= 0x7f:
-        return "\\x%02x" %(i, )
-    return repr(chr(i))[1:-1]
-
-ascii_repr = dict(
-    (i, _ascii_repr(i))
+ascii_table = dict(
+    (unichr(i), chr_to_ascii(unichr(i)))
     for i in range(255)
 )
 
@@ -366,26 +362,23 @@ class PrettyPrinter(object):
                 quote = "'"
                 quotes = {"'": "\\'"}
             qget = quotes.get
-            ascii_repr_get = ascii_repr.get
+            ascii_table_get = ascii_table.get
             unicat_get = unicodedata.category
             write(u_prefix + quote)
             for char in object:
-                cat = unicat_get(char)
-                if unicode_printable_categories.get(cat):
-                    try:
-                        write(char)
-                        continue
-                    except UnicodeEncodeError:
-                        pass
-                is_qt = qget(char)
-                if is_qt is not None:
-                    write(is_qt)
-                    continue
-                ord_char = ord(char)
-                if ord_char > 0xff:
-                    write(r"\u%04x" %(ord_char, ))
-                else:
-                    write(ascii_repr_get(ord_char))
+                if ord(char) > 0x7F:
+                    cat = unicat_get(char)
+                    if unicode_printable_categories.get(cat):
+                        try:
+                            write(char)
+                            continue
+                        except UnicodeEncodeError:
+                            pass
+                write(
+                    qget(char) or
+                    ascii_table_get(char) or
+                    chr_to_ascii(char)
+                )
             write(quote)
             return
 
