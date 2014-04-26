@@ -18,8 +18,9 @@ BytesType = bytes
 TextType = str if PY3 else unicode
 u_prefix = '' if PY3 else 'u'
 if PY3:
-    _ascii = globals()["__builtins__"]["ascii"]
-    chr_to_ascii = lambda x: _ascii(x)[1:-1]
+    # Import builins explicitly to keep Py2 static analyzers happy
+    import builtins
+    chr_to_ascii = lambda x: builtins.ascii(x)[1:-1]
     unichr = chr
 else:
     chr_to_ascii = lambda x: repr(x)[2:-1]
