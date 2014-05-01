@@ -3,6 +3,7 @@ language: python
 python:
   - 2.7
   - 3.3
+  - 3.4
   - pypy
 
 install:
@@ -14,3 +15,4 @@ script:
 matrix:
   allow_failures:
     - python: 3.3
+    - python: 3.4
