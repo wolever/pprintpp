@@ -11,6 +11,13 @@ install:
 script:
   - python test.py
 
+after_success:
+  - pip install pep8 pyflakes
+  - pep8 *.py
+  - pyflakes *.py
+  - pep8 pp/*.py
+  - pyflakes pp/*.py
+
 matrix:
   allow_failures:
     - python: 3.3

@@ -25,6 +25,7 @@ if PY3:
 else:
     chr_to_ascii = lambda x: repr(x)[2:-1]
 
+
 class TextIO(io.TextIOWrapper):
     def __init__(self, encoding=None):
         io.TextIOWrapper.__init__(self, io.BytesIO(), encoding=encoding)
@@ -43,44 +44,44 @@ class TextIO(io.TextIOWrapper):
 # hand, mostly guessing, so please file bugs.
 # Source: http://www.unicode.org/reports/tr44/#GC_Values_Table
 unicode_printable_categories = {
-    "Lu": 1, # Uppercase_Letter	an uppercase letter
-    "Ll": 1, # Lowercase_Letter	a lowercase letter
-    "Lt": 1, # Titlecase_Letter	a digraphic character, with first part uppercase
-    "LC": 1, # Cased_Letter	Lu | Ll | Lt
-    "Lm": 0, # Modifier_Letter	a modifier letter
-    "Lo": 1, # Other_Letter	other letters, including syllables and ideographs
-    "L":  1, # Letter	Lu | Ll | Lt | Lm | Lo
-    "Mn": 0, # Nonspacing_Mark	a nonspacing combining mark (zero advance width)
-    "Mc": 0, # Spacing_Mark	a spacing combining mark (positive advance width)
-    "Me": 0, # Enclosing_Mark	an enclosing combining mark
-    "M":  1, # Mark	Mn | Mc | Me
-    "Nd": 1, # Decimal_Number	a decimal digit
-    "Nl": 1, # Letter_Number	a letterlike numeric character
-    "No": 1, # Other_Number	a numeric character of other type
-    "N":  1, # Number	Nd | Nl | No
-    "Pc": 1, # Connector_Punctuation	a connecting punctuation mark, like a tie
-    "Pd": 1, # Dash_Punctuation	a dash or hyphen punctuation mark
-    "Ps": 1, # Open_Punctuation	an opening punctuation mark (of a pair)
-    "Pe": 1, # Close_Punctuation	a closing punctuation mark (of a pair)
-    "Pi": 1, # Initial_Punctuation	an initial quotation mark
-    "Pf": 1, # Final_Punctuation	a final quotation mark
-    "Po": 1, # Other_Punctuation	a punctuation mark of other type
-    "P":  1, # Punctuation	Pc | Pd | Ps | Pe | Pi | Pf | Po
-    "Sm": 1, # Math_Symbol	a symbol of mathematical use
-    "Sc": 1, # Currency_Symbol	a currency sign
-    "Sk": 1, # Modifier_Symbol	a non-letterlike modifier symbol
-    "So": 1, # Other_Symbol	a symbol of other type
-    "S":  1, # Symbol	Sm | Sc | Sk | So
-    "Zs": 0, # Space_Separator	a space character (of various non-zero widths)
-    "Zl": 0, # Line_Separator	U+2028 LINE SEPARATOR only
-    "Zp": 0, # Paragraph_Separator	U+2029 PARAGRAPH SEPARATOR only
-    "Z":  1, # Separator	Zs | Zl | Zp
-    "Cc": 0, # Control	a C0 or C1 control code
-    "Cf": 0, # Format	a format control character
-    "Cs": 0, # Surrogate	a surrogate code point
-    "Co": 0, # Private_Use	a private-use character
-    "Cn": 0, # Unassigned	a reserved unassigned code point or a noncharacter
-    "C":  0, # Other	Cc | Cf | Cs | Co | Cn
+    "Lu": 1,  # Uppercase_Letter	an uppercase letter
+    "Ll": 1,  # Lowercase_Letter	a lowercase letter
+    "Lt": 1,  # Titlecase_Letter	a digraphic character, with first part uppercase
+    "LC": 1,  # Cased_Letter	Lu | Ll | Lt
+    "Lm": 0,  # Modifier_Letter	a modifier letter
+    "Lo": 1,  # Other_Letter	other letters, including syllables and ideographs
+    "L":  1,  # Letter	Lu | Ll | Lt | Lm | Lo
+    "Mn": 0,  # Nonspacing_Mark	a nonspacing combining mark (zero advance width)
+    "Mc": 0,  # Spacing_Mark	a spacing combining mark (positive advance width)
+    "Me": 0,  # Enclosing_Mark	an enclosing combining mark
+    "M":  1,  # Mark	Mn | Mc | Me
+    "Nd": 1,  # Decimal_Number	a decimal digit
+    "Nl": 1,  # Letter_Number	a letterlike numeric character
+    "No": 1,  # Other_Number	a numeric character of other type
+    "N":  1,  # Number	Nd | Nl | No
+    "Pc": 1,  # Connector_Punctuation	a connecting punctuation mark, like a tie
+    "Pd": 1,  # Dash_Punctuation	a dash or hyphen punctuation mark
+    "Ps": 1,  # Open_Punctuation	an opening punctuation mark (of a pair)
+    "Pe": 1,  # Close_Punctuation	a closing punctuation mark (of a pair)
+    "Pi": 1,  # Initial_Punctuation	an initial quotation mark
+    "Pf": 1,  # Final_Punctuation	a final quotation mark
+    "Po": 1,  # Other_Punctuation	a punctuation mark of other type
+    "P":  1,  # Punctuation	Pc | Pd | Ps | Pe | Pi | Pf | Po
+    "Sm": 1,  # Math_Symbol	a symbol of mathematical use
+    "Sc": 1,  # Currency_Symbol	a currency sign
+    "Sk": 1,  # Modifier_Symbol	a non-letterlike modifier symbol
+    "So": 1,  # Other_Symbol	a symbol of other type
+    "S":  1,  # Symbol	Sm | Sc | Sk | So
+    "Zs": 0,  # Space_Separator	a space character (of various non-zero widths)
+    "Zl": 0,  # Line_Separator	U+2028 LINE SEPARATOR only
+    "Zp": 0,  # Paragraph_Separator	U+2029 PARAGRAPH SEPARATOR only
+    "Z":  1,  # Separator	Zs | Zl | Zp
+    "Cc": 0,  # Control	a C0 or C1 control code
+    "Cf": 0,  # Format	a format control character
+    "Cs": 0,  # Surrogate	a surrogate code point
+    "Co": 0,  # Private_Use	a private-use character
+    "Cn": 0,  # Unassigned	a reserved unassigned code point or a noncharacter
+    "C":  0,  # Other	Cc | Cf | Cs | Co | Cn
 }
 
 ascii_table = dict(
@@ -88,27 +89,34 @@ ascii_table = dict(
     for i in range(255)
 )
 
+
 def pprint(object, stream=None, indent=4, width=80, depth=None):
     """Pretty-print a Python object to a stream [default is sys.stdout]."""
     printer = PrettyPrinter(
         stream=stream, indent=indent, width=width, depth=depth)
     printer.pprint(object)
 
+
 def pformat(object, indent=4, width=80, depth=None):
     """Format a Python object into a pretty-printed representation."""
-    return PrettyPrinter(indent=indent, width=width, depth=depth).pformat(object)
+    return PrettyPrinter(
+        indent=indent, width=width, depth=depth).pformat(object)
+
 
 def saferepr(object):
     """Version of repr() which can handle recursive data structures."""
     return PrettyPrinter().pformat(object)
 
+
 def isreadable(object):
     """Determine if saferepr(object) is readable by eval()."""
     return PrettyPrinter().isreadable(object)
 
+
 def isrecursive(object):
     """Determine if object requires a recursive representation."""
     return PrettyPrinter().isrecursive(object)
+
 
 def _sorted(iterable):
     with warnings.catch_warnings():
@@ -117,6 +125,7 @@ def _sorted(iterable):
                                     "not supported", DeprecationWarning)
         return sorted(iterable)
 
+
 def console(argv=None):
     if argv is None:
         argv = sys.argv
@@ -124,13 +133,14 @@ def console(argv=None):
         name = argv[0]
         if name.startswith("/"):
             name = os.path.basename(name)
-        print("Usage: %s" %(argv[0], ))
+        print("Usage: %s" % (argv[0], ))
         print()
-        print("Pipe Python literals into %s to pretty-print them" %(argv[0], ))
+        print("Pipe Python literals into %s to pretty-print them" % (argv[0], ))
         return 1
     obj = ast.literal_eval(sys.stdin.read().strip())
     pprint(obj)
     return 0
+
 
 def monkeypatch(mod=None):
     if "pprint" in sys.modules:
@@ -139,6 +149,7 @@ def monkeypatch(mod=None):
     import pprint
     sys.modules["pprint_original"] = pprint
     sys.modules["pprint"] = mod or sys.modules["pprintpp"]
+
 
 class PPrintSharedState(object):
     recursive = False
@@ -338,7 +349,7 @@ class PrettyPrinter(object):
             typeish, opener, closer, empty = opener_closer_empty
             if r == defaultdict.__repr__:
                 factory_repr = object.default_factory
-                opener = "defaultdict(%r, {" %(factory_repr, )
+                opener = "defaultdict(%r, {" % (factory_repr, )
                 empty = opener + closer
 
             length = len(object)
@@ -425,7 +436,7 @@ if __name__ == "__main__":
             def array(o):
                 return o
 
-    somelist = [1,2,3]
+    somelist = [1, 2, 3]
     recursive = []
     recursive.extend([recursive, recursive, recursive])
     pprint({
@@ -433,7 +444,7 @@ if __name__ == "__main__":
         "b": [somelist, somelist],
         "c": [
             (1, ),
-            (1,2,3),
+            (1, 2, 3),
         ],
         "counter": [
             Counter(),
@@ -445,7 +456,7 @@ if __name__ == "__main__":
         ],
         "np": [
             "hello",
-            #np.array([[1,2],[3,4]]),
+            # np.array([[1,2],[3,4]]),
             "world",
         ],
         u"u": ["a", u"\u1234", "b"],
