@@ -10,6 +10,7 @@ sys.path.append("pp/")
 import pp
 import pprintpp as p
 
+
 class PPrintppTestBase(object):
     def assertStdout(self, expected, trim=True):
         if trim:
@@ -43,13 +44,13 @@ class TestPP(PPrintppTestBase):
 class TestPPrint(PPrintppTestBase):
     uni_safe = u"\xe9 \u6f02 \u0e4f \u2661"
     uni_unsafe = u"\u200a \u0302 \n"
-    slashed = lambda s: u"%s'%s'" %(
+    slashed = lambda s: u"%s'%s'" % (
         p.u_prefix,
         s.encode("ascii", "backslashreplace").decode("ascii").replace("\n", "\\n")
     )
 
     @parameterized([
-        param("safe", uni_safe, "%s'%s'" %(p.u_prefix, uni_safe)),
+        param("safe", uni_safe, "%s'%s'" % (p.u_prefix, uni_safe)),
         param("unsafe", uni_unsafe, slashed(uni_unsafe)),
         param("encoding-aware", uni_safe, slashed(uni_safe), encoding="ascii"),
         param("high-end-chars", u"\U0002F9B2", slashed(u"\U0002F9B2"), encoding="ascii"),
