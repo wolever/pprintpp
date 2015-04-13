@@ -60,11 +60,13 @@ class TestPPrint(PPrintppTestBase):
         assert_equal(stream.getvalue().rstrip("\n"), expected)
 
     @parameterized([
-        param("both", "'\"", u"'\\'\"'"),
-        param("single", "'", u'"\'"'),
-        param("double", '"', u"'\"'"),
+        param("quotes: both", "'\"", u"'\\'\"'"),
+        param("quotes: single", "'", u'"\'"'),
+        param("quotes: double", '"', u"'\"'"),
+        param("type: frozenset", frozenset("abc"), "frozenset(['a', 'b', 'c'])"),
+        param("type: heterogeneous set", set([None, 1, "a"]), "set([None, 1, 'a'])"),
     ])
-    def test_quotes(self, name, input, expected):
+    def test_testcases(self, name, input, expected):
         stream = p.TextIO()
         p.pprint(input, stream=stream)
         assert_equal(stream.getvalue().rstrip("\n"), expected)

@@ -443,6 +443,7 @@ if __name__ == "__main__":
             defaultdict(int, {}),
             defaultdict(int, {"foo": 42}),
         ],
+        "frozenset": frozenset("abc"),
         "np": [
             "hello",
             #np.array([[1,2],[3,4]]),
