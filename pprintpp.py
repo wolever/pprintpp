@@ -6,7 +6,11 @@ import ast
 import sys
 import warnings
 import unicodedata
-from collections import defaultdict, Counter
+from collections import defaultdict
+try:
+    from collections import Counter
+except ImportError:
+    from backport_collections import Counter
 
 __all__ = [
     "pprint", "pformat", "isreadable", "isrecursive", "saferepr",
