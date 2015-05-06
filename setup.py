@@ -12,6 +12,11 @@ try:
 except IOError:
     long_description = "See https://github.com/wolever/pprintpp"
 
+requires = []
+if sys.version_info < (2, 7):
+    requires.append('backport_collections')
+
+
 setup(
     name="pprintpp",
     version="0.2.1",
@@ -26,7 +31,7 @@ setup(
             'pypprint = pprintpp:console',
         ],
     },
-    install_requires=[],
+    install_requires=requires,
     license="BSD",
     classifiers=[ x.strip() for x in """
         Development Status :: 3 - Alpha
