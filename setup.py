@@ -14,7 +14,7 @@ except IOError:
 
 setup(
     name="pprintpp",
-    version="0.2.1",
+    version="0.2.2",
     url="https://github.com/wolever/pprintpp",
     author="David Wolever",
     author_email="david@wolever.net",

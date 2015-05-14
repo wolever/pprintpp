@@ -7,31 +7,61 @@ import sys
 import warnings
 import unicodedata
 
-class dummy_class(object):
-    """ A dummy class used as a substitute for imports which don't exist. """
-    __repr__ = object()
-
-try:
-    from collections import defaultdict, Counter
-except ImportError:
-    defaultdict, Counter = dummy_class, dummy_class
-
 __all__ = [
     "pprint", "pformat", "isreadable", "isrecursive", "saferepr",
     "PrettyPrinter",
 ]
 
+
+#
+# Py2/Py3 compatibility stuff
+#
+
+try:
+    from collections import defaultdict, Counter
+except ImportError:
+    # Python 2.6 doesn't have collections
+    class dummy_class(object):
+        __repr__ = object()
+    defaultdict, Counter = dummy_class, dummy_class
+
+
 PY3 = sys.version_info >= (3, 0, 0)
 BytesType = bytes
 TextType = str if PY3 else unicode
 u_prefix = '' if PY3 else 'u'
+
+
 if PY3:
     # Import builins explicitly to keep Py2 static analyzers happy
     import builtins
     chr_to_ascii = lambda x: builtins.ascii(x)[1:-1]
     unichr = chr
+
+    from .safesort import safesort
 else:
     chr_to_ascii = lambda x: repr(x)[2:-1]
+    safesort = sorted
+
+
+def _sorted_py2(iterable):
+    with warnings.catch_warnings():
+        if getattr(sys, "py3kwarning", False):
+            warnings.filterwarnings("ignore", "comparing unequal types "
+                                    "not supported", DeprecationWarning)
+        return sorted(iterable)
+
+def _sorted_py3(iterable):
+    try:
+        return sorted(iterable)
+    except TypeError:
+        return safesort(iterable)
+
+_sorted = PY3 and _sorted_py3 or _sorted_py3
+
+#
+# End compatibility stuff
+#
 
 class TextIO(io.TextIOWrapper):
     def __init__(self, encoding=None):
@@ -117,13 +147,6 @@ def isreadable(object):
 def isrecursive(object):
     """Determine if object requires a recursive representation."""
     return PrettyPrinter().isrecursive(object)
-
-def _sorted(iterable):
-    with warnings.catch_warnings():
-        if getattr(sys, "py3kwarning", False):
-            warnings.filterwarnings("ignore", "comparing unequal types "
-                                    "not supported", DeprecationWarning)
-        return sorted(iterable)
 
 def console(argv=None):
     if argv is None:
