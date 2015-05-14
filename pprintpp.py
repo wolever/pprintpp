@@ -212,6 +212,26 @@ class PPrintState(object):
     def get_indent_string(self):
         return (self.level * self.indent) * " "
 
+def _mk_open_close_empty_dict(type_tuples):
+    """ Generates a dictionary mapping either ``cls.__repr__`` xor ``cls`` to
+        a tuple of ``(container_type, repr_open, repr_close, repr_empty)`` (see
+        ``PrettyPrinter._open_close_empty`` for examples).
+
+        Using either ``cls.__repr__`` xor ``cls`` is important because some
+        types (specifically, ``set`` and ``frozenset`` on PyPy) share a
+        ``__repr__``. When we are determining how to repr an object, the type
+        is first checked, then if it's not found ``type.__repr__`` is checked.
+
+        Note that ``__repr__`` is used so that trivial subclasses will behave
+        sensibly. """
+
+    res = {}
+    for (cls, open_close_empty) in type_tuples:
+        if cls.__repr__ in res:
+            res[cls] = open_close_empty
+        else:
+            res[cls.__repr__] = open_close_empty
+    return res
 
 class PrettyPrinter(object):
     def __init__(self, indent=4, width=80, depth=None, stream=None):
@@ -262,15 +282,15 @@ class PrettyPrinter(object):
         self._format(object, state)
         return state.s.readable and not state.s.recursive
 
-    _container_reprs = {
-        dict.__repr__: ("dict", "{", "}", "{}"),
-        list.__repr__: ("list", "[", "]", "[]"),
-        tuple.__repr__: ("tuple", "(", ")", "()"),
-        set.__repr__: ("set", "set([", "])", "set()"),
-        frozenset.__repr__: ("set", "frozenset([", "])", "frozenset()"),
-        Counter.__repr__: ("dict", "Counter({", "})", "Counter()"),
-        defaultdict.__repr__: ("dict", None, "})", None),
-    }
+    _open_close_empty = _mk_open_close_empty_dict([
+        (dict, ("dict", "{", "}", "{}")),
+        (list, ("list", "[", "]", "[]")),
+        (tuple, ("tuple", "(", ")", "()")),
+        (set, ("set", "set([", "])", "set()")),
+        (frozenset, ("set", "frozenset([", "])", "frozenset()")),
+        (Counter, ("dict", "Counter({", "})", "Counter()")),
+        (defaultdict, ("dict", None, "})", None)),
+    ])
 
     def _format_nested_objects(self, object, state, typeish=None):
         objid = id(object)
@@ -341,7 +361,12 @@ class PrettyPrinter(object):
 
         typ = type(object)
         r = typ.__repr__
-        opener_closer_empty = self._container_reprs.get(r)
+        # Note: see comments on _mk_open_close_empty_dict for the rational
+        # behind looking up based first on type then on __repr__.
+        opener_closer_empty = (
+            self._open_close_empty.get(typ) or
+            self._open_close_empty.get(r)
+        )
         if opener_closer_empty is not None:
             typeish, opener, closer, empty = opener_closer_empty
             if r == defaultdict.__repr__:
