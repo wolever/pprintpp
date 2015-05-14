@@ -22,10 +22,16 @@ Usage
 
 ``pprint++`` can be used in three ways:
 
-1. As a regular module::
+1. Through the separate ``pp`` package::
 
-   >>> import pprintpp
-   >>> pprintpp.pprint(...)
+    $ pip install pp-ez
+    $ python
+    ...
+    >>> import pp
+    >>> pp(["Hello", "world"])
+    ["Hello", "world"]
+
+   For more, see https://pypi.python.org/pypi/pp-ez
 
 2. As a command-line program, which will read Python literals from standard in
    and pretty-print them::
@@ -40,19 +46,14 @@ Usage
     >>> import pprint
     >>> pprint.pprint(...)
 
-   Note: the original ``pprint`` will be available with ``import
+   Note: the original ``pprint`` module will be available with ``import
    pprint_original``.
 
-4. Through the separate ``pp`` package::
+4. And, if you *really* want, it can even be imported as a regular module:
 
-    $ pip install pp-ez
-    $ python
-    ...
-    >>> import pp
-    >>> pp(["Hello", "world"])
-    ["Hello", "world"]
+   >>> import pprintpp
+   >>> pprintpp.pprint(...)
 
-   For more, see https://pypi.python.org/pypi/pp-ez
 
 Usability Protips
 -----------------
