@@ -6,7 +6,15 @@ import ast
 import sys
 import warnings
 import unicodedata
-from collections import defaultdict, Counter
+
+class dummy_class(object):
+    """ A dummy class used as a substitute for imports which don't exist. """
+    __repr__ = object()
+
+try:
+    from collections import defaultdict, Counter
+except ImportError:
+    defaultdict, Counter = dummy_class, dummy_class
 
 __all__ = [
     "pprint", "pformat", "isreadable", "isrecursive", "saferepr",

@@ -1,3 +1,7 @@
+0.2.2 (2015-05-13)
+    * Add Python 2.6 compatibility (pprintpp will work without the
+      `collections` module; thanks @ulope)
+
 0.2.1 (2014-04-22)
     * Some minor bugfixes
 
