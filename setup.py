@@ -14,13 +14,13 @@ except IOError:
 
 setup(
     name="pprintpp",
-    version="0.2.2",
+    version="0.2.3",
     url="https://github.com/wolever/pprintpp",
     author="David Wolever",
     author_email="david@wolever.net",
     description="A drop-in replacement for pprint that's actually pretty",
     long_description=long_description,
-    py_modules=["pprintpp"],
+    packages=["pprintpp"],
     entry_points={
         'console_scripts': [
             'pypprint = pprintpp:console',

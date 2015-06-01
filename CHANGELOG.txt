@@ -1,3 +1,8 @@
+0.2.3 (2015-06-01)
+    * Oops, fixed setup.py so the module is actually push'd to PyPI (thanks
+      @OldhamMade).
+    * pprintpp is now a package, not a single .py file.
+
 0.2.2 (2015-05-14)
     * Add Python 2.6 compatibility (pprintpp will work without the
       `collections` module; thanks @ulope)
