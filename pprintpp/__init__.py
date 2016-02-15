@@ -163,8 +163,8 @@ def console(argv=None):
     pprint(obj)
     return 0
 
-def monkeypatch(mod=None):
-    if "pprint" in sys.modules:
+def monkeypatch(mod=None, quiet=False):
+    if "pprint" in sys.modules and not quiet:
         warnings.warn("'pprint' has already been imported; monkeypatching "
                       "won't work everywhere.")
     import pprint

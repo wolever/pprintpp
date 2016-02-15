@@ -47,7 +47,8 @@ Usage
     >>> pprint.pprint(...)
 
    Note: the original ``pprint`` module will be available with ``import
-   pprint_original``.
+   pprint_original``. Additionally, a warning will be issued if ``pprint`` has
+   already been imported. This can be suppressed by passing ``quiet=True``.
 
 4. And, if you *really* want, it can even be imported as a regular module:
 
