@@ -18,12 +18,12 @@ __all__ = [
 #
 
 try:
-    from collections import defaultdict, Counter
+    from collections import OrderedDict, defaultdict, Counter
 except ImportError:
     # Python 2.6 doesn't have collections
     class dummy_class(object):
         __repr__ = object()
-    defaultdict, Counter = dummy_class, dummy_class
+    OrderedDict = defaultdict = Counter = dummy_class
 
 
 PY3 = sys.version_info >= (3, 0, 0)
@@ -37,11 +37,12 @@ if PY3:
     import builtins
     chr_to_ascii = lambda x: builtins.ascii(x)[1:-1]
     unichr = chr
-
     from .safesort import safesort
+    _iteritems = lambda x: x.items()
 else:
     chr_to_ascii = lambda x: repr(x)[2:-1]
     safesort = sorted
+    _iteritems = lambda x: x.iteritems()
 
 
 def _sorted_py2(iterable):
@@ -313,6 +314,7 @@ class PrettyPrinter(object):
         (frozenset, ("set", "frozenset([", "])", "frozenset()")),
         (Counter, ("dict", "Counter({", "})", "Counter()")),
         (defaultdict, ("dict", None, "})", None)),
+        (OrderedDict, ("odict", "OrderedDict([", "])", "OrderedDict()")),
     ])
 
     def _format_nested_objects(self, object, state, typeish=None):
@@ -357,6 +359,17 @@ class PrettyPrinter(object):
                 self._format(k, state)
                 state.write(": ")
                 self._format(v, state)
+        elif typeish == "odict":
+            for k, v in _iteritems(object):
+                if first:
+                    first = False
+                else:
+                    state.write(joiner)
+                state.write("(")
+                self._format(k, state)
+                state.write(", ")
+                self._format(v, state)
+                state.write(")")
         else:
             if typeish == "set":
                 object = _sorted(object)
@@ -491,6 +504,12 @@ if __name__ == "__main__":
             (1, ),
             (1,2,3),
         ],
+        "ordereddict": OrderedDict([
+            (1, 1),
+            (10, 10),
+            (2, 2),
+            (11, 11)
+        ]),
         "counter": [
             Counter(),
             Counter("asdfasdfasdf"),

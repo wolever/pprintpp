@@ -65,7 +65,10 @@ class TestPPrint(PPrintppTestBase):
         param("quotes: double", '"', u"'\"'"),
         param("type: frozenset", frozenset("abc"), "frozenset(['a', 'b', 'c'])"),
         param("type: heterogeneous set", set([None, 1, "a"]), "set([None, 1, 'a'])"),
-    ])
+    ] + ([] if "dummy_class" in str(p.OrderedDict) else [
+        param("type: OrderedDict (empty)", p.OrderedDict(), "OrderedDict()"),
+        param("type: OrderedDict (full)", p.OrderedDict([(1, 1), (5, 5), (2, 2)]), "OrderedDict([(1, 1), (5, 5), (2, 2)])"),
+    ]))
     def test_testcases(self, name, input, expected):
         stream = p.TextIO()
         p.pprint(input, stream=stream)
