@@ -19,11 +19,13 @@ __all__ = [
 
 try:
     from collections import OrderedDict, defaultdict, Counter
+    _test_has_collections = True
 except ImportError:
     # Python 2.6 doesn't have collections
     class dummy_class(object):
         __repr__ = object()
     OrderedDict = defaultdict = Counter = dummy_class
+    _test_has_collections = False
 
 
 PY3 = sys.version_info >= (3, 0, 0)
@@ -252,9 +254,9 @@ def _mk_open_close_empty_dict(type_tuples):
     res = {}
     for (cls, open_close_empty) in type_tuples:
         if cls.__repr__ in res:
-            res[cls] = open_close_empty
+            res[cls] = (cls, ) + open_close_empty
         else:
-            res[cls.__repr__] = open_close_empty
+            res[cls.__repr__] = (cls, ) + open_close_empty
     return res
 
 class PrettyPrinter(object):
@@ -310,11 +312,11 @@ class PrettyPrinter(object):
         (dict, ("dict", "{", "}", "{}")),
         (list, ("list", "[", "]", "[]")),
         (tuple, ("tuple", "(", ")", "()")),
-        (set, ("set", "set([", "])", "set()")),
-        (frozenset, ("set", "frozenset([", "])", "frozenset()")),
-        (Counter, ("dict", "Counter({", "})", "Counter()")),
+        (set, ("set", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
+        (frozenset, ("set", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
+        (Counter, ("dict", "__PP_TYPE__({", "})", "__PP_TYPE__()")),
         (defaultdict, ("dict", None, "})", None)),
-        (OrderedDict, ("odict", "OrderedDict([", "])", "OrderedDict()")),
+        (OrderedDict, ("odict", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
     ])
 
     def _format_nested_objects(self, object, state, typeish=None):
@@ -404,17 +406,28 @@ class PrettyPrinter(object):
             self._open_close_empty.get(r)
         )
         if opener_closer_empty is not None:
-            typeish, opener, closer, empty = opener_closer_empty
+            orig_type, typeish, opener, closer, empty = opener_closer_empty
+            if typ != orig_type:
+                if opener is not None and "__PP_TYPE__" not in opener:
+                    opener = "__PP_TYPE__(" + opener
+                    closer = closer + ")"
+                if empty is not None and "__PP_TYPE__" not in empty:
+                    empty = "__PP_TYPE__(%s)" %(empty, )
+
             if r == defaultdict.__repr__:
                 factory_repr = object.default_factory
-                opener = "defaultdict(%r, {" %(factory_repr, )
+                opener = "__PP_TYPE__(%r, {" %(factory_repr, )
                 empty = opener + closer
 
             length = len(object)
             if length == 0:
+                if "__PP_TYPE__" in empty:
+                    empty = empty.replace("__PP_TYPE__", typ.__name__)
                 write(empty)
                 return
 
+            if "__PP_TYPE__" in opener:
+                opener = opener.replace("__PP_TYPE__", typ.__name__)
             write(opener)
             self._format_nested_objects(object, state, typeish=typeish)
             write(closer)

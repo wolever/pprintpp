@@ -9,6 +9,7 @@ from nose_parameterized import parameterized, param
 sys.path.append("pp/")
 import pp
 import pprintpp as p
+from pprintpp import Counter, defaultdict, OrderedDict
 
 class PPrintppTestBase(object):
     def assertStdout(self, expected, trim=True):
@@ -40,6 +41,34 @@ class TestPP(PPrintppTestBase):
         print(repr(pp))
 
 
+class MyDict(dict):
+    pass
+
+class MyList(list):
+    pass
+
+class MyTuple(tuple):
+    pass
+
+class MySet(set):
+    pass
+
+class MyFrozenSet(frozenset):
+    pass
+
+class MyOrderedDict(p.OrderedDict):
+    pass
+
+class MyDefaultDict(p.defaultdict):
+    pass
+
+class MyCounter(p.Counter):
+    pass
+
+class MyCounterWithRepr(p.Counter):
+    def __repr__(self):
+        return "MyCounterWithRepr('dummy')"
+
 class TestPPrint(PPrintppTestBase):
     uni_safe = u"\xe9 \u6f02 \u0e4f \u2661"
     uni_unsafe = u"\u200a \u0302 \n"
@@ -60,19 +89,62 @@ class TestPPrint(PPrintppTestBase):
         assert_equal(stream.getvalue().rstrip("\n"), expected)
 
     @parameterized([
-        param("quotes: both", "'\"", u"'\\'\"'"),
-        param("quotes: single", "'", u'"\'"'),
-        param("quotes: double", '"', u"'\"'"),
-        param("type: frozenset", frozenset("abc"), "frozenset(['a', 'b', 'c'])"),
-        param("type: heterogeneous set", set([None, 1, "a"]), "set([None, 1, 'a'])"),
-    ] + ([] if "dummy_class" in str(p.OrderedDict) else [
-        param("type: OrderedDict (empty)", p.OrderedDict(), "OrderedDict()"),
-        param("type: OrderedDict (full)", p.OrderedDict([(1, 1), (5, 5), (2, 2)]), "OrderedDict([(1, 1), (5, 5), (2, 2)])"),
+        param(u"'\\'\"'"),
+        param(u'"\'"'),
+        param(u"'\"'"),
+        param("frozenset(['a', 'b', 'c'])"),
+        param("set([None, 1, 'a'])"),
+
+        param("[]"),
+        param("[1]"),
+        param("{}"),
+        param("{1: 1}"),
+        param("set()"),
+        param("set([1])"),
+        param("frozenset()"),
+        param("frozenset([1])"),
+        param("()"),
+        param("(1, )"),
+
+        param("MyDict({})"),
+        param("MyDict({1: 1})"),
+        param("MyList([])"),
+        param("MyList([1])"),
+        param("MyTuple(())"),
+        param("MyTuple((1, ))"),
+        param("MySet()"),
+        param("MySet([1])"),
+        param("MyFrozenSet()"),
+        param("MyFrozenSet([1])"),
+
+    ] + ([] if not p._test_has_collections else [
+        param("Counter()"),
+        param("Counter({1: 1})"),
+        param("OrderedDict()"),
+        param("OrderedDict([(1, 1), (5, 5), (2, 2)])"),
+        param("MyOrderedDict()"),
+        param("MyOrderedDict([(1, 1)])"),
+        param("MyCounter()"),
+        param("MyCounter({1: 1})"),
+        param("MyCounterWithRepr('dummy')"),
     ]))
-    def test_testcases(self, name, input, expected):
+    def test_back_and_forth(self, expected):
+        input = eval(expected)
         stream = p.TextIO()
         p.pprint(input, stream=stream)
         assert_equal(stream.getvalue().rstrip("\n"), expected)
+
+    if p._test_has_collections:
+        @parameterized([
+            param("defaultdict(%r, {})" %(int, ), defaultdict(int)),
+            param("defaultdict(%r, {1: 1})" %(int, ), defaultdict(int, [(1, 1)])),
+            param("MyDefaultDict(%r, {})" %(int, ), MyDefaultDict(int)),
+            param("MyDefaultDict(%r, {1: 1})" %(int, ), MyDefaultDict(int, [(1, 1)])),
+        ])
+        def test_expected_input(self, expected, input):
+            stream = p.TextIO()
+            p.pprint(input, stream=stream)
+            assert_equal(stream.getvalue().rstrip("\n"), expected)
 
 
 if __name__ == "__main__":

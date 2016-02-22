@@ -1,4 +1,7 @@
-0.2.4 (tbd)
+0.3.0 (tbd)
+    * Add support for subclasses of built-in collections and collections
+      module (ex, if no __repr__ is defined, a subclass of dict will be
+      repr'd ``MyDictSubclass({...})``).
     * Add support for ``collections.OrderedDict``
     * Add ``quiet=True`` flag to monkeypatch
 

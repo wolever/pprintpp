@@ -129,6 +129,30 @@ The output stream's encoding will be considered too:
     >>> print stream.getvalue()
     u'\xe9e\u0301'
 
+Subclassess of built-in collection types which don't define a new ``__repr__``
+will have their class name explicitly added to their repr. For example:
+
+.. code:: pycon
+
+    >>> class MyList(list):
+    ...     pass
+    ...
+    >>> pprint(MyList())
+    MyList()
+    >>> pprint(MyList([1, 2, 3]))
+    MyList([1, 2, 3])
+
+Note that, as you might expect, custom ``__repr__`` methods will be respected:
+
+.. code:: pycon
+
+    >>> class MyList(list):
+    ...     def __repr__(self):
+    ...         return "custom repr!"
+    ...
+    >>> pprint(MyList())
+    custom repr!
+
 **Note**: ``pprint++`` is still under development, so the format *will* change
 and improve over time.
 
