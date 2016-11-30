@@ -1,13 +1,15 @@
 language: python
 
 python:
+  - 2.6
   - 2.7
   - 3.3
   - 3.4
+  - 3.5
   - pypy
 
 install:
-  - pip install --use-mirrors -r test-requires.txt
+  - pip install -r test-requires.txt
 
 script:
   - python test.py
@@ -16,3 +18,4 @@ matrix:
   allow_failures:
     - python: 3.3
     - python: 3.4
+    - python: 3.5
