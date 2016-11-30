@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import sys
+import ctypes
 import textwrap
 
 from nose.tools import assert_equal
@@ -145,6 +146,26 @@ class TestPPrint(PPrintppTestBase):
             stream = p.TextIO()
             p.pprint(input, stream=stream)
             assert_equal(stream.getvalue().rstrip("\n"), expected)
+
+    def test_unhashable_repr(self):
+        # In Python 3, C extensions can define a __repr__ method which is an
+        # instance of `instancemethod`, which is unhashable. It turns out to be
+        # spectacularly difficult to create an `instancemethod` and attach it to
+        # a type without using C... so we'll simulate it using a more explicitly
+        # unhashable type.
+        # See also: http://stackoverflow.com/q/40876368/71522
+
+        class UnhashableCallable(object):
+            __hash__ = None
+
+            def __call__(self):
+                return "some-repr"
+
+        class MyCls(object):
+            __repr__ = UnhashableCallable()
+
+        obj = MyCls()
+        assert_equal(p.pformat(obj), "some-repr")
 
 
 if __name__ == "__main__":

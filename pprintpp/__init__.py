@@ -227,7 +227,7 @@ class PPrintState(object):
                 raise self.WriteConstrained
 
         if isinstance(data, BytesType):
-            data = data.decode("ascii")
+            data = data.decode("latin1")
         self.stream.write(data)
         nl_idx = data.rfind("\n")
         if nl_idx < 0:
@@ -401,10 +401,16 @@ class PrettyPrinter(object):
         r = typ.__repr__
         # Note: see comments on _mk_open_close_empty_dict for the rational
         # behind looking up based first on type then on __repr__.
-        opener_closer_empty = (
-            self._open_close_empty.get(typ) or
-            self._open_close_empty.get(r)
-        )
+        try:
+            opener_closer_empty = (
+                self._open_close_empty.get(typ) or
+                self._open_close_empty.get(r)
+            )
+        except TypeError:
+            # This will happen if the type or the __repr__ is unhashable.
+            # See: https://github.com/wolever/pprintpp/issues/18
+            opener_closer_empty = None
+
         if opener_closer_empty is not None:
             orig_type, typeish, opener, closer, empty = opener_closer_empty
             if typ != orig_type:

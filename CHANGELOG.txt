@@ -1,9 +1,11 @@
-0.3.0 (tbd)
+0.3.0
     * Add support for subclasses of built-in collections and collections
       module (ex, if no __repr__ is defined, a subclass of dict will be
       repr'd ``MyDictSubclass({...})``).
     * Add support for ``collections.OrderedDict``
     * Add ``quiet=True`` flag to monkeypatch
+    * Fixed crash on non-hashable instancemethods
+      (https://github.com/wolever/pprintpp/issues/18)
 
 0.2.3 (2015-06-01)
     * Oops, fixed setup.py so the module is actually push'd to PyPI (thanks
