@@ -1,11 +1,10 @@
 language: python
 
 python:
-  - 2.6
   - 2.7
-  - 3.3
-  - 3.4
+  - 3.6
   - 3.5
+  - 3.4
   - pypy
 
 install:
@@ -13,9 +12,3 @@ install:
 
 script:
   - python test.py
-
-matrix:
-  allow_failures:
-    - python: 3.3
-    - python: 3.4
-    - python: 3.5
