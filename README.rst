@@ -41,7 +41,7 @@ Usage
 
 3. As an IPython extension::
 
-    In [1]: %load_ext pprintpp.ipython
+    In [1]: %load_ext pprintpp
 
 4. To monkeypatch ``pprint``::
 

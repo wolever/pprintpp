@@ -562,3 +562,13 @@ if __name__ == "__main__":
     stream = TextIO(encoding="ascii")
     pprint(unistr, stream=stream)
     print(stream.getvalue())
+
+
+def load_ipython_extension(ipython):
+    from .ipython import load_ipython_extension
+    return load_ipython_extension(ipython)
+
+
+def unload_ipython_extension(ipython):
+    from .ipython import unload_ipython_extension
+    return unload_ipython_extension(ipython)
