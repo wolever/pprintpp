@@ -39,7 +39,11 @@ Usage
     $ echo "{'hello': 'world'}" | pypprint
     {'hello': 'world'}
 
-3. To monkeypatch ``pprint``::
+3. As an IPython extension::
+
+    In [1]: %load_ext pprintpp.ipython
+
+4. To monkeypatch ``pprint``::
 
     >>> import pprintpp
     >>> pprintpp.monkeypatch()
@@ -50,7 +54,7 @@ Usage
    pprint_original``. Additionally, a warning will be issued if ``pprint`` has
    already been imported. This can be suppressed by passing ``quiet=True``.
 
-4. And, if you *really* want, it can even be imported as a regular module:
+5. And, if you *really* want, it can even be imported as a regular module:
 
    >>> import pprintpp
    >>> pprintpp.pprint(...)
