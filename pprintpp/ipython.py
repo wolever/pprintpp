@@ -1,3 +1,13 @@
+"""
+An ipython extension that monkey-patches it to use pprintpp.
+
+This solution was adapted from an answer to this Stack Overflow question:
+https://stackoverflow.com/questions/35375099
+asked by:
+https://stackoverflow.com/users/71522/david-wolever
+and answered by:
+https://stackoverflow.com/users/1530134/kupiakos
+"""
 import IPython
 from traitlets.config import Configurable
 from traitlets import Int
