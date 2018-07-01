@@ -1,3 +1,7 @@
+0.4.0
+    * Add IPython plugin (thanks @roee30;
+      https://github.com/wolever/pprintpp/pull/20)
+
 0.3.0
     * Add support for subclasses of built-in collections and collections
       module (ex, if no __repr__ is defined, a subclass of dict will be
