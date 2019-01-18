@@ -5,7 +5,7 @@ import ctypes
 import textwrap
 
 from nose.tools import assert_equal
-from nose_parameterized import parameterized, param
+from parameterized import parameterized, param
 
 sys.path.append("pp/")
 import pp
