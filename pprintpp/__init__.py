@@ -62,6 +62,16 @@ def _sorted_py3(iterable):
 
 _sorted = PY3 and _sorted_py3 or _sorted_py3
 
+if hasattr(TextType, 'isascii'):  # Python>=3.7
+    _isascii = TextType.isascii
+else:
+    def _isascii(text):
+        try:
+            text.encode('ascii')
+        except UnicodeEncodeError:
+            return False
+        return True
+
 #
 # End compatibility stuff
 #
@@ -444,6 +454,9 @@ class PrettyPrinter(object):
             return
 
         if r == TextType.__repr__:
+            if _isascii(object):  # Optimalization
+                write(repr(object))
+                return
             if "'" in object and '"' not in object:
                 quote = '"'
                 quotes = {'"': '\\"'}
