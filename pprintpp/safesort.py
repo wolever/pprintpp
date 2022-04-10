@@ -1,8 +1,5 @@
-import sys
 import textwrap
 import functools
-
-PY3 = (sys.version_info >= (3, 0, 0))
 
 def memoized_property(f):
     @functools.wraps(f)
@@ -38,9 +35,7 @@ class SafelySortable(object):
 
     @memoized_property
     def prefix(self):
-        if PY3:
-            return tuple(t.__name__ for t in type(self.obj).__mro__)
-        return type(self.obj).__mro__
+        return tuple(t.__name__ for t in type(self.obj).__mro__)
 
     @memoized_property
     def safeobj(self):
@@ -69,5 +64,4 @@ class SafelySortable(object):
 
 def safesort(input, key=None, reverse=False):
     """ Safely sort heterogeneous collections. """
-    # TODO: support cmp= on Py 2.x?
     return sorted(input, key=lambda o: SafelySortable(o, key=key), reverse=reverse)

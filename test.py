@@ -41,14 +41,13 @@ def test_module_like():
 
 uni_safe = "\xe9 \u6f02 \u0e4f \u2661"
 uni_unsafe = "\u200a \u0302 \n"
-slashed = lambda s: u"%s'%s'" %(
-    p.u_prefix,
+slashed = lambda s: u"'%s'" %(
     s.encode("ascii", "backslashreplace").decode("ascii").replace("\n", "\\n")
 )
 
 @pytest.mark.skip('fix')
 @pytest.mark.parametrize("input,expected,encoding", [
-    (uni_safe, "%s'%s'" %(p.u_prefix, uni_safe), "utf-8"),
+    (uni_safe, "'%s'" % uni_safe, "utf-8"),
     (uni_unsafe, slashed(uni_unsafe), "utf-8"),
     (uni_unsafe, slashed(uni_unsafe), "ascii"),
     ("\U0002F9B2", slashed("\U0002F9B2"), "ascii")

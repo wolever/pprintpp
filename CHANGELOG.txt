@@ -2,7 +2,8 @@
     * Update some documentation to point to `pprintpp2` instead.
     * Use GitHub Actions instead of Travis.
     * Use `pytest` instead of `nose` (thanks @pgajdos).
-    * `sort_dict` option added (thanks @gergelyk).
+    * Add `sort_dict` option (thanks @gergelyk).
+    * Remove support for older Python versions (3.7+ from now on).
 
 0.4.0
     * Add IPython plugin (thanks @roee30;

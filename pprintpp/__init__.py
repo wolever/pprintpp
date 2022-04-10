@@ -12,69 +12,18 @@ __all__ = [
     "PrettyPrinter",
 ]
 
-
-#
-# Py2/Py3 compatibility stuff
-#
-
-try:
-    from collections import OrderedDict, defaultdict, Counter
-    _test_has_collections = True
-except ImportError:
-    # Python 2.6 doesn't have collections
-    class dummy_class(object):
-        __repr__ = object()
-    OrderedDict = defaultdict = Counter = dummy_class
-    _test_has_collections = False
+from collections import OrderedDict, defaultdict, Counter
+from .safesort import safesort
 
 
-PY3 = sys.version_info >= (3, 0, 0)
-BytesType = bytes
-TextType = str if PY3 else unicode
-u_prefix = '' if PY3 else 'u'
+chr_to_ascii = lambda x: ascii(x)[1:-1]
 
-
-if PY3:
-    # Import builins explicitly to keep Py2 static analyzers happy
-    import builtins
-    chr_to_ascii = lambda x: builtins.ascii(x)[1:-1]
-    unichr = chr
-    from .safesort import safesort
-    _iteritems = lambda x: x.items()
-else:
-    chr_to_ascii = lambda x: repr(x)[2:-1]
-    safesort = sorted
-    _iteritems = lambda x: x.iteritems()
-
-
-def _sorted_py2(iterable):
-    with warnings.catch_warnings():
-        if getattr(sys, "py3kwarning", False):
-            warnings.filterwarnings("ignore", "comparing unequal types "
-                                    "not supported", DeprecationWarning)
-        return sorted(iterable)
-
-def _sorted_py3(iterable):
+def _sorted(iterable):
     try:
         return sorted(iterable)
     except TypeError:
         return safesort(iterable)
 
-_sorted = PY3 and _sorted_py3 or _sorted_py3
-
-if hasattr(TextType, 'isascii'):  # Python>=3.7
-    _isascii = TextType.isascii
-else:
-    def _isascii(text):
-        try:
-            text.encode('ascii')
-        except UnicodeEncodeError:
-            return False
-        return True
-
-#
-# End compatibility stuff
-#
 
 class TextIO(io.TextIOWrapper):
     def __init__(self, encoding=None):
@@ -135,7 +84,7 @@ unicode_printable_categories = {
 }
 
 ascii_table = dict(
-    (unichr(i), chr_to_ascii(unichr(i)))
+    (chr(i), chr_to_ascii(chr(i)))
     for i in range(255)
 )
 
@@ -240,7 +189,7 @@ class PPrintState(object):
             if self.write_constrain < 0:
                 raise self.WriteConstrained
 
-        if isinstance(data, BytesType):
+        if isinstance(data, bytes):
             data = data.decode("latin1")
         self.stream.write(data)
         nl_idx = data.rfind("\n")
@@ -386,7 +335,7 @@ class PrettyPrinter(object):
                 state.write(": ")
                 self._format(v, state)
         elif typeish == "odict":
-            for k, v in _iteritems(object):
+            for k, v in object.items():
                 if first:
                     first = False
                 else:
@@ -463,12 +412,12 @@ class PrettyPrinter(object):
             write(closer)
             return
 
-        if r == BytesType.__repr__:
+        if r == bytes.__repr__:
             write(repr(object))
             return
 
-        if r == TextType.__repr__:
-            if _isascii(object):  # Optimalization
+        if r == str.__repr__:
+            if str.isascii(object):  # Optimalization
                 write(repr(object))
                 return
             if "'" in object and '"' not in object:
@@ -480,7 +429,7 @@ class PrettyPrinter(object):
             qget = quotes.get
             ascii_table_get = ascii_table.get
             unicat_get = unicodedata.category
-            write(u_prefix + quote)
+            write(quote)
             for char in object:
                 if ord(char) > 0x7F:
                     cat = unicat_get(char)
