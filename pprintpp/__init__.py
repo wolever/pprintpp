@@ -1,22 +1,20 @@
 from __future__ import print_function
 
+import ast
 import io
 import os
-import ast
 import sys
-import warnings
 import unicodedata
+import warnings
+from collections import Counter, OrderedDict, defaultdict
 
-__all__ = [
-    "pprint", "pformat", "isreadable", "isrecursive", "saferepr",
-    "PrettyPrinter",
-]
-
-from collections import OrderedDict, defaultdict, Counter
 from .safesort import safesort
+
+__all__ = ["pprint", "pformat", "isreadable", "isrecursive", "saferepr", "PrettyPrinter"]
 
 
 chr_to_ascii = lambda x: ascii(x)[1:-1]
+
 
 def _sorted(iterable):
     try:
@@ -42,6 +40,7 @@ class TextIO(io.TextIOWrapper):
 # ambiguous are repr'd, others will be printed. I made this table mostly by
 # hand, mostly guessing, so please file bugs.
 # Source: http://www.unicode.org/reports/tr44/#GC_Values_Table
+# fmt: off
 unicode_printable_categories = {
     "Lu": 1, # Uppercase_Letter	an uppercase letter
     "Ll": 1, # Lowercase_Letter	a lowercase letter
@@ -82,36 +81,40 @@ unicode_printable_categories = {
     "Cn": 0, # Unassigned	a reserved unassigned code point or a noncharacter
     "C":  0, # Other	Cc | Cf | Cs | Co | Cn
 }
+# fmt: on
 
-ascii_table = dict(
-    (chr(i), chr_to_ascii(chr(i)))
-    for i in range(255)
-)
+ascii_table = dict((chr(i), chr_to_ascii(chr(i))) for i in range(255))
 
-def pprint(object, stream=None, indent=4, width=80, depth=None,
-           sort_dicts=True):
+
+def pprint(object, stream=None, indent=4, width=80, depth=None, sort_dicts=True):
     """Pretty-print a Python object to a stream [default is sys.stdout]."""
     printer = PrettyPrinter(
-        stream=stream, indent=indent, width=width, depth=depth,
-        sort_dicts=sort_dicts)
+        stream=stream, indent=indent, width=width, depth=depth, sort_dicts=sort_dicts
+    )
     printer.pprint(object)
+
 
 def pformat(object, indent=4, width=80, depth=None, sort_dicts=True):
     """Format a Python object into a pretty-printed representation."""
-    return PrettyPrinter(indent=indent, width=width, depth=depth,
-                         sort_dicts=sort_dicts).pformat(object)
+    return PrettyPrinter(indent=indent, width=width, depth=depth, sort_dicts=sort_dicts).pformat(
+        object
+    )
+
 
 def saferepr(object):
     """Version of repr() which can handle recursive data structures."""
     return PrettyPrinter().pformat(object)
 
+
 def isreadable(object):
     """Determine if saferepr(object) is readable by eval()."""
     return PrettyPrinter().isreadable(object)
 
+
 def isrecursive(object):
     """Determine if object requires a recursive representation."""
     return PrettyPrinter().isrecursive(object)
+
 
 def console(argv=None):
     if argv is None:
@@ -120,21 +123,23 @@ def console(argv=None):
         name = argv[0]
         if name.startswith("/"):
             name = os.path.basename(name)
-        print("Usage: %s" %(argv[0], ))
+        print("Usage: %s" % (argv[0],))
         print()
-        print("Pipe Python literals into %s to pretty-print them" %(argv[0], ))
+        print("Pipe Python literals into %s to pretty-print them" % (argv[0],))
         return 1
     obj = ast.literal_eval(sys.stdin.read().strip())
     pprint(obj)
     return 0
 
+
 def monkeypatch(mod=None, quiet=False):
     if "pprint" in sys.modules and not quiet:
-        warnings.warn("'pprint' has already been imported; monkeypatching "
-                      "won't work everywhere.")
+        warnings.warn("'pprint' has already been imported; monkeypatching won't work everywhere.")
     import pprint
+
     sys.modules["pprint_original"] = pprint
     sys.modules["pprint"] = mod or sys.modules["pprintpp"]
+
 
 class PPrintSharedState(object):
     recursive = False
@@ -201,30 +206,34 @@ class PPrintState(object):
     def get_indent_string(self):
         return (self.level * self.indent) * " "
 
+
 def _mk_open_close_empty_dict(type_tuples):
-    """ Generates a dictionary mapping either ``cls.__repr__`` xor ``cls`` to
-        a tuple of ``(container_type, repr_open, repr_close, repr_empty)`` (see
-        ``PrettyPrinter._open_close_empty`` for examples).
+    """
+    Generates a dictionary mapping either ``cls.__repr__`` xor ``cls`` to
+    a tuple of ``(container_type, repr_open, repr_close, repr_empty)`` (see
+    ``PrettyPrinter._open_close_empty`` for examples).
 
-        Using either ``cls.__repr__`` xor ``cls`` is important because some
-        types (specifically, ``set`` and ``frozenset`` on PyPy) share a
-        ``__repr__``. When we are determining how to repr an object, the type
-        is first checked, then if it's not found ``type.__repr__`` is checked.
+    Using either ``cls.__repr__`` xor ``cls`` is important because some
+    types (specifically, ``set`` and ``frozenset`` on PyPy) share a
+    ``__repr__``. When we are determining how to repr an object, the type
+    is first checked, then if it's not found ``type.__repr__`` is checked.
 
-        Note that ``__repr__`` is used so that trivial subclasses will behave
-        sensibly. """
+    Note that ``__repr__`` is used so that trivial subclasses will behave
+    sensibly."""
 
     res = {}
     for (cls, open_close_empty) in type_tuples:
         if cls.__repr__ in res:
-            res[cls] = (cls, ) + open_close_empty
+            res[cls] = (cls,) + open_close_empty
         else:
-            res[cls.__repr__] = (cls, ) + open_close_empty
+            res[cls.__repr__] = (cls,) + open_close_empty
     return res
+
 
 class PrettyPrinter(object):
     def __init__(self, indent=4, width=80, depth=None, stream=None, sort_dicts=True):
-        """Handle pretty printing operations onto a stream using a set of
+        """
+        Handle pretty printing operations onto a stream using a set of
         configured parameters.
 
         indent
@@ -249,7 +258,7 @@ class PrettyPrinter(object):
         self.get_default_state = lambda: PPrintState(
             indent=int(indent),
             max_width=int(width),
-            sort_dicts = sort_dicts,
+            sort_dicts=sort_dicts,
             stream=stream or sys.stdout,
             context={},
         )
@@ -277,16 +286,18 @@ class PrettyPrinter(object):
         self._format(object, state)
         return state.s.readable and not state.s.recursive
 
-    _open_close_empty = _mk_open_close_empty_dict([
-        (dict, ("dict", "{", "}", "{}")),
-        (list, ("list", "[", "]", "[]")),
-        (tuple, ("tuple", "(", ")", "()")),
-        (set, ("set", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
-        (frozenset, ("set", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
-        (Counter, ("dict", "__PP_TYPE__({", "})", "__PP_TYPE__()")),
-        (defaultdict, ("dict", None, "})", None)),
-        (OrderedDict, ("odict", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
-    ])
+    _open_close_empty = _mk_open_close_empty_dict(
+        [
+            (dict, ("dict", "{", "}", "{}")),
+            (list, ("list", "[", "]", "[]")),
+            (tuple, ("tuple", "(", ")", "()")),
+            (set, ("set", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
+            (frozenset, ("set", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
+            (Counter, ("dict", "__PP_TYPE__({", "})", "__PP_TYPE__()")),
+            (defaultdict, ("dict", None, "})", None)),
+            (OrderedDict, ("odict", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
+        ]
+    )
 
     def _format_nested_objects(self, object, state, typeish=None):
         objid = id(object)
@@ -297,12 +308,9 @@ class PrettyPrinter(object):
             # that it takes three characters to close the object (ex, `]),`)
             oneline_state = state.clone(clone_shared=True)
             oneline_state.stream = TextIO()
-            oneline_state.write_constrain = (
-                state.max_width - state.s.cur_line_length - 3
-            )
+            oneline_state.write_constrain = state.max_width - state.s.cur_line_length - 3
             try:
-                self._write_nested_real(object, oneline_state, typeish,
-                                        oneline=True)
+                self._write_nested_real(object, oneline_state, typeish, oneline=True)
                 oneline_value = oneline_state.stream.getvalue()
                 if "\n" in oneline_value:
                     oneline_value = None
@@ -375,10 +383,7 @@ class PrettyPrinter(object):
         # Note: see comments on _mk_open_close_empty_dict for the rational
         # behind looking up based first on type then on __repr__.
         try:
-            opener_closer_empty = (
-                self._open_close_empty.get(typ) or
-                self._open_close_empty.get(r)
-            )
+            opener_closer_empty = self._open_close_empty.get(typ) or self._open_close_empty.get(r)
         except TypeError:
             # This will happen if the type or the __repr__ is unhashable.
             # See: https://github.com/wolever/pprintpp/issues/18
@@ -391,11 +396,11 @@ class PrettyPrinter(object):
                     opener = "__PP_TYPE__(" + opener
                     closer = closer + ")"
                 if empty is not None and "__PP_TYPE__" not in empty:
-                    empty = "__PP_TYPE__(%s)" %(empty, )
+                    empty = "__PP_TYPE__(%s)" % (empty,)
 
             if r == defaultdict.__repr__:
                 factory_repr = object.default_factory
-                opener = "__PP_TYPE__(%r, {" %(factory_repr, )
+                opener = "__PP_TYPE__(%r, {" % (factory_repr,)
                 empty = opener + closer
 
             length = len(object)
@@ -439,26 +444,18 @@ class PrettyPrinter(object):
                             continue
                         except UnicodeEncodeError:
                             pass
-                write(
-                    qget(char) or
-                    ascii_table_get(char) or
-                    chr_to_ascii(char)
-                )
+                write(qget(char) or ascii_table_get(char) or chr_to_ascii(char))
             write(quote)
             return
 
         orepr = repr(object)
         orepr = orepr.replace("\n", "\n" + state.get_indent_string())
-        state.s.readable = (
-            state.s.readable and
-            not orepr.startswith("<")
-        )
+        state.s.readable = state.s.readable and not orepr.startswith("<")
         write(orepr)
         return
 
     def _repr(self, object, context, level):
-        repr, readable, recursive = self.format(object, context.copy(),
-                                                self._depth, level)
+        repr, readable, recursive = self.format(object, context.copy(), self._depth, level)
         if not readable:
             self._readable = False
         if recursive:
@@ -476,59 +473,63 @@ class PrettyPrinter(object):
 
     def _recursion(self, object, state):
         state.s.recursive = True
-        return ("<Recursion on %s with id=%s>"
-                % (type(object).__name__, id(object)))
+        return "<Recursion on %s with id=%s>" % (type(object).__name__, id(object))
 
 
 if __name__ == "__main__":
     try:
         import numpy as np
     except ImportError:
+
         class np(object):
             @staticmethod
             def array(o):
                 return o
 
-    somelist = [1,2,3]
+    somelist = [1, 2, 3]
     recursive = []
     recursive.extend([recursive, recursive, recursive])
-    pprint({
-        "a": {"a": "b"},
-        "b": [somelist, somelist],
-        "c": [
-            (1, ),
-            (1,2,3),
-        ],
-        "ordereddict": OrderedDict([
-            (1, 1),
-            (10, 10),
-            (2, 2),
-            (11, 11)
-        ]),
-        "counter": [
-            Counter(),
-            Counter("asdfasdfasdf"),
-        ],
-        "dd": [
-            defaultdict(int, {}),
-            defaultdict(int, {"foo": 42}),
-        ],
-        "frozenset": frozenset("abc"),
-        "np": [
-            "hello",
-            #np.array([[1,2],[3,4]]),
-            "world",
-        ],
-        u"u": ["a", u"\u1234", "b"],
-        "recursive": recursive,
-        "z": {
-            "very very very long key stuff 1234": {
-                "much value": "very nest! " * 10,
-                u"unicode": u"4U!'\"",
+    pprint(
+        {
+            "a": {"a": "b"},
+            "b": [somelist, somelist],
+            "c": [
+                (1,),
+                (1, 2, 3),
+            ],
+            "ordereddict": OrderedDict(
+                [
+                    (1, 1),
+                    (10, 10),
+                    (2, 2),
+                    (11, 11),
+                ]
+            ),
+            "counter": [
+                Counter(),
+                Counter("asdfasdfasdf"),
+            ],
+            "dd": [
+                defaultdict(int, {}),
+                defaultdict(int, {"foo": 42}),
+            ],
+            "frozenset": frozenset("abc"),
+            "np": [
+                "hello",
+                # np.array([[1,2],[3,4]]),
+                "world",
+            ],
+            u"u": ["a", u"\u1234", "b"],
+            "recursive": recursive,
+            "z": {
+                "very very very long key stuff 1234": {
+                    "much value": "very nest! " * 10,
+                    u"unicode": u"4U!'\"",
+                },
+                "aldksfj alskfj askfjas fkjasdlkf jasdlkf ajslfjas": ["asdf"] * 10,
             },
-            "aldksfj alskfj askfjas fkjasdlkf jasdlkf ajslfjas": ["asdf"] * 10,
-        },
-    })
+        }
+    )
     pprint(u"\xe9e\u0301")
     uni_safe = u"\xe9 \u6f02 \u0e4f \u2661"
     uni_unsafe = u"\u200a \u0301 \n"
@@ -542,9 +543,11 @@ if __name__ == "__main__":
 
 def load_ipython_extension(ipython):
     from .ipython import load_ipython_extension
+
     return load_ipython_extension(ipython)
 
 
 def unload_ipython_extension(ipython):
     from .ipython import unload_ipython_extension
+
     return unload_ipython_extension(ipython)

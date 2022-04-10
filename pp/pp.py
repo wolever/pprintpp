@@ -31,7 +31,7 @@ class pp_magic_module(types.ModuleType):
         return self.pformat(*args, **kwargs)
 
     def __repr__(self):
-        return "<module '%s' (pp_magic_module with pprint_mod=%r)>" %(
+        return "<module '%s' (pp_magic_module with pprint_mod=%r)>" % (
             self.__name__,
             self.pprint_mod.__name__,
         )

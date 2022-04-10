@@ -20,7 +20,7 @@ jobs:
       - name: Install requirements
         run: |
           python -m pip install -U pip
-          python -m pip install -r test-requires.txt
+          python -m pip install -r requirements-test.txt
       - name: Run tests
         run: |
-          pytest test.py
+          python -m pytest .

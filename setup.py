@@ -28,7 +28,9 @@ setup(
     },
     install_requires=[],
     license="BSD",
-    classifiers=[ x.strip() for x in """
+    classifiers=[
+        x.strip()
+        for x in """
         Development Status :: 3 - Alpha
         Environment :: Console
         Intended Audience :: Developers
@@ -39,5 +41,9 @@ setup(
         Programming Language :: Python :: 3
         Topic :: Software Development
         Topic :: Utilities
-    """.split("\n") if x.strip() ],
+    """.split(
+            "\n"
+        )
+        if x.strip()
+    ],
 )

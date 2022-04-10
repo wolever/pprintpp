@@ -1,14 +1,16 @@
 from __future__ import print_function
 
+import io
 import sys
 from contextlib import redirect_stdout
-import io
+
 import pytest
 
 sys.path.append("pp/")
 import pp
 import pprintpp as p
-from pprintpp import Counter, defaultdict, OrderedDict
+from pprintpp import Counter, OrderedDict, defaultdict
+
 
 def test_pp():
     expected = "['hello', 'world']"
@@ -18,6 +20,7 @@ def test_pp():
     actual = f.getvalue().rstrip("\n")
     assert actual == expected
 
+
 def test_pp_print():
     expected = "'stuff'"
     f = io.StringIO()
@@ -25,6 +28,7 @@ def test_pp_print():
         pp.pprint("stuff")
     actual = f.getvalue().rstrip("\n")
     assert actual == expected
+
 
 def test_fmt():
     expected = "'asdf'\n'stuff'"
@@ -35,27 +39,34 @@ def test_fmt():
     actual = f.getvalue().rstrip("\n")
     assert actual == expected
 
+
 def test_module_like():
-     print(dir(pp))
-     print(repr(pp))
+    print(dir(pp))
+    print(repr(pp))
+
 
 uni_safe = "\xe9 \u6f02 \u0e4f \u2661"
 uni_unsafe = "\u200a \u0302 \n"
-slashed = lambda s: u"'%s'" %(
+slashed = lambda s: u"'%s'" % (
     s.encode("ascii", "backslashreplace").decode("ascii").replace("\n", "\\n")
 )
 
+
 @pytest.mark.skip('fix')
-@pytest.mark.parametrize("input,expected,encoding", [
-    (uni_safe, "'%s'" % uni_safe, "utf-8"),
-    (uni_unsafe, slashed(uni_unsafe), "utf-8"),
-    (uni_unsafe, slashed(uni_unsafe), "ascii"),
-    ("\U0002F9B2", slashed("\U0002F9B2"), "ascii")
-])
+@pytest.mark.parametrize(
+    "input,expected,encoding",
+    [
+        (uni_safe, "'%s'" % uni_safe, "utf-8"),
+        (uni_unsafe, slashed(uni_unsafe), "utf-8"),
+        (uni_unsafe, slashed(uni_unsafe), "ascii"),
+        ("\U0002F9B2", slashed("\U0002F9B2"), "ascii"),
+    ],
+)
 def test_unicode(input, expected, encoding):
     stream = p.TextIO(encoding=encoding)
     p.pprint(input, stream=stream)
     assert stream.getvalue().rstrip("\n") == expected
+
 
 test_back_and_forth_data = [
     "'\\'\"'",
@@ -94,33 +105,43 @@ test_back_and_forth_data = [
     "MyCounterWithRepr('dummy')",
 ]
 
+
 class MyDict(dict):
     pass
+
 
 class MyList(list):
     pass
 
+
 class MyTuple(tuple):
     pass
+
 
 class MySet(set):
     pass
 
+
 class MyFrozenSet(frozenset):
     pass
+
 
 class MyOrderedDict(p.OrderedDict):
     pass
 
+
 class MyDefaultDict(p.defaultdict):
     pass
+
 
 class MyCounter(p.Counter):
     pass
 
+
 class MyCounterWithRepr(p.Counter):
     def __repr__(self):
         return "MyCounterWithRepr('dummy')"
+
 
 @pytest.mark.skip('fix')
 @pytest.mark.parametrize("expected", test_back_and_forth_data)
@@ -130,15 +151,17 @@ def test_back_and_forth(expected):
     p.pprint(input, stream=stream)
     assert stream.getvalue().rstrip("\n") == expected
 
-test_expected_input_data = [
-    ("defaultdict(%r, {})" %(int, ), defaultdict(int)),
-    ("defaultdict(%r, {1: 1})" %(int, ), defaultdict(int, [(1, 1)])),
-    ("MyDefaultDict(%r, {})" %(int, ), MyDefaultDict(int)),
-    ("MyDefaultDict(%r, {1: 1})" %(int, ), MyDefaultDict(int, [(1, 1)])),
-]
 
 @pytest.mark.skip('fix')
-@pytest.mark.parametrize("expected,input", test_expected_input_data)
+@pytest.mark.parametrize(
+    "expected,input",
+    [
+        ("defaultdict(%r, {})" % (int,), defaultdict(int)),
+        ("defaultdict(%r, {1: 1})" % (int,), defaultdict(int, [(1, 1)])),
+        ("MyDefaultDict(%r, {})" % (int,), MyDefaultDict(int)),
+        ("MyDefaultDict(%r, {1: 1})" % (int,), MyDefaultDict(int, [(1, 1)])),
+    ],
+)
 def test_expected_input(expected, input):
     stream = p.TextIO()
     p.pprint(input, stream=stream)
@@ -164,6 +187,3 @@ def test_unhashable_repr():
 
     obj = MyCls()
     assert p.pformat(obj) == "some-repr"
-
-
-
