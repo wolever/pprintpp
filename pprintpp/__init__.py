@@ -139,15 +139,18 @@ ascii_table = dict(
     for i in range(255)
 )
 
-def pprint(object, stream=None, indent=4, width=80, depth=None):
+def pprint(object, stream=None, indent=4, width=80, depth=None,
+           sort_dicts=True):
     """Pretty-print a Python object to a stream [default is sys.stdout]."""
     printer = PrettyPrinter(
-        stream=stream, indent=indent, width=width, depth=depth)
+        stream=stream, indent=indent, width=width, depth=depth,
+        sort_dicts=sort_dicts)
     printer.pprint(object)
 
-def pformat(object, indent=4, width=80, depth=None):
+def pformat(object, indent=4, width=80, depth=None, sort_dicts=True):
     """Format a Python object into a pretty-printed representation."""
-    return PrettyPrinter(indent=indent, width=width, depth=depth).pformat(object)
+    return PrettyPrinter(indent=indent, width=width, depth=depth,
+                         sort_dicts=sort_dicts).pformat(object)
 
 def saferepr(object):
     """Version of repr() which can handle recursive data structures."""
@@ -200,6 +203,7 @@ class PPrintState(object):
     level = 0
     max_width = 80
     max_depth = None
+    sort_dicts = True
     stream = None
     context = None
     write_constrain = None
@@ -270,7 +274,7 @@ def _mk_open_close_empty_dict(type_tuples):
     return res
 
 class PrettyPrinter(object):
-    def __init__(self, indent=4, width=80, depth=None, stream=None):
+    def __init__(self, indent=4, width=80, depth=None, stream=None, sort_dicts=True):
         """Handle pretty printing operations onto a stream using a set of
         configured parameters.
 
@@ -287,10 +291,16 @@ class PrettyPrinter(object):
             The desired output stream.  If omitted (or false), the standard
             output stream available at construction will be used.
 
+        sort_dicts
+            If `True`, dictionaries will be formatted with their keys sorted,
+            otherwise they will display in the order as returned by `items`
+            method.
+
         """
         self.get_default_state = lambda: PPrintState(
             indent=int(indent),
             max_width=int(width),
+            sort_dicts = sort_dicts,
             stream=stream or sys.stdout,
             context={},
         )
@@ -363,7 +373,11 @@ class PrettyPrinter(object):
         first = True
         joiner = oneline and ", " or ",\n" + indent_str
         if typeish == "dict":
-            for k, v in _sorted(object.items()):
+            items = object.items()
+            if state.sort_dicts:
+                items = _sorted(items)
+
+            for k, v in items:
                 if first:
                     first = False
                 else:
