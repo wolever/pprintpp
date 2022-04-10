@@ -1,6 +1,7 @@
 0.5.0 (unreleased)
     * Update some documentation to point to `pprintpp2` instead.
-    * Use GitHub Actions instead of Travis
+    * Use GitHub Actions instead of Travis.
+    * Use `pytest` instead of `nose` (thanks @pgajdos).
 
 0.4.0
     * Add IPython plugin (thanks @roee30;
