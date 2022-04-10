@@ -5,11 +5,11 @@ import sys
 from contextlib import redirect_stdout
 
 import pytest
+import pprintpp as p
+from pprintpp import defaultdict
 
 sys.path.append("pp/")
-import pp
-import pprintpp as p
-from pprintpp import Counter, OrderedDict, defaultdict
+import pp  # noqa: E402 module level import not at top of file
 
 
 def test_pp():
@@ -47,9 +47,10 @@ def test_module_like():
 
 uni_safe = "\xe9 \u6f02 \u0e4f \u2661"
 uni_unsafe = "\u200a \u0302 \n"
-slashed = lambda s: u"'%s'" % (
-    s.encode("ascii", "backslashreplace").decode("ascii").replace("\n", "\\n")
-)
+
+
+def slashed(s):
+    return "'%s'" % s.encode("ascii", "backslashreplace").decode("ascii").replace("\n", "\\n")
 
 
 @pytest.mark.skip('fix')
