@@ -482,13 +482,13 @@ if __name__ == "__main__":
         import numpy as np
     except ImportError:
 
-        class np(object):
+        class np(object):  # type: ignore
             @staticmethod
             def array(o):
                 return o
 
     somelist = [1, 2, 3]
-    recursive = []
+    recursive = []  # type: ignore  # TODO: Add type hinting for mypy
     recursive.extend([recursive, recursive, recursive])
     pprint(
         {

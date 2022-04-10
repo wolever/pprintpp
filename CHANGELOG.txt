@@ -4,8 +4,9 @@
     * Add `sort_dict` option (thanks @gergelyk).
     * Use `pytest` instead of `nose` (thanks @pgajdos).
     * Use GitHub Actions instead of Travis.
-    * Linting: `isort`, `black`, `flake8`.
+    * Linting: `isort`, `black`, `flake8` and `mypy`.
       Wrapping at 100 lines from the previous 80.
+    * Security: `safety` and `bandit`.
     * Other file and folder restructuring.
 
 0.4.0

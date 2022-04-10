@@ -1,4 +1,5 @@
 [tool.bandit]
+recursive = true  # TODO: fix
 
 [tool.black]
 line-length = 100
@@ -17,7 +18,8 @@ testpaths = ['tests']
 python_version = '3.7'
 warn_return_any = true
 warn_unused_configs = true
+exclude = ['pp/setup.py']
 
 [[tool.mypy.overrides]]
-module = ['invoke', 'pytest_check']
+module = ['IPython', 'numpy', 'traitlets.*']
 ignore_missing_imports = true
