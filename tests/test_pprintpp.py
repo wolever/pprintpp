@@ -3,6 +3,7 @@ from __future__ import print_function
 import io
 import sys
 from contextlib import redirect_stdout
+from collections import Counter, defaultdict, OrderedDict
 
 import pytest
 import pprintpp as p
@@ -53,7 +54,6 @@ def slashed(s):
     return "'%s'" % s.encode("ascii", "backslashreplace").decode("ascii").replace("\n", "\\n")
 
 
-@pytest.mark.skip('fix')
 @pytest.mark.parametrize(
     "input,expected,encoding",
     [
@@ -127,15 +127,15 @@ class MyFrozenSet(frozenset):
     pass
 
 
-class MyOrderedDict(p.OrderedDict):
+class MyOrderedDict(OrderedDict):
     pass
 
 
-class MyDefaultDict(p.defaultdict):
+class MyDefaultDict(defaultdict):
     pass
 
 
-class MyCounter(p.Counter):
+class MyCounter(Counter):
     pass
 
 
@@ -144,7 +144,6 @@ class MyCounterWithRepr(p.Counter):
         return "MyCounterWithRepr('dummy')"
 
 
-@pytest.mark.skip('fix')
 @pytest.mark.parametrize("expected", test_back_and_forth_data)
 def test_back_and_forth(expected):
     input = eval(expected)
@@ -153,7 +152,6 @@ def test_back_and_forth(expected):
     assert stream.getvalue().rstrip("\n") == expected
 
 
-@pytest.mark.skip('fix')
 @pytest.mark.parametrize(
     "expected,input",
     [
