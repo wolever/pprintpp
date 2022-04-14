@@ -31,17 +31,16 @@ setup(
     classifiers=[
         x.strip()
         for x in """
-        Development Status :: 3 - Alpha
-        Environment :: Console
-        Intended Audience :: Developers
-        License :: OSI Approved :: BSD License
-        Natural Language :: English
-        Operating System :: OS Independent
-        Programming Language :: Python
-        Programming Language :: Python :: 3
-        Topic :: Software Development
-        Topic :: Utilities
-    """.split(
+            Environment :: Console
+            Intended Audience :: Developers
+            License :: OSI Approved :: BSD License
+            Natural Language :: English
+            Operating System :: OS Independent
+            Programming Language :: Python
+            Programming Language :: Python :: 3
+            Topic :: Software Development
+            Topic :: Utilities
+        """.split(
             "\n"
         )
         if x.strip()

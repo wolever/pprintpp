@@ -14,6 +14,10 @@ sections = 'FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER'
 [tool.pytest.ini_options]
 testpaths = ['tests']
 
+[tool.flake8]
+max-line-length = 120
+disable = ["E261"]
+
 [tool.mypy]
 python_version = '3.7'
 warn_return_any = true

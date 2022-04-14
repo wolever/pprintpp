@@ -1,13 +1,9 @@
 0.5.0 (unreleased)
-    * Update documentation to point to `pprintpp2` instead.
     * Remove support for older Python versions (3.7+ from now on).
     * Add `sort_dict` option (thanks @gergelyk).
     * Use `pytest` instead of `nose` (thanks @pgajdos).
     * Use GitHub Actions instead of Travis.
-    * Linting: `isort`, `black`, `flake8` and `mypy`.
-      Wrapping at 100 lines from the previous 80.
     * Security: `safety` and `bandit`.
-    * Other file and folder restructuring.
 
 0.4.0
     * Add IPython plugin (thanks @roee30;

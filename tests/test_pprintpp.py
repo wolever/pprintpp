@@ -7,7 +7,6 @@ from collections import Counter, defaultdict, OrderedDict
 
 import pytest
 import pprintpp as p
-from pprintpp import defaultdict
 
 sys.path.append("pp/")
 import pp  # noqa: E402 module level import not at top of file
