@@ -1,17 +1,11 @@
 ``pprint++``: a drop-in replacement for ``pprint`` that's actually pretty
 =========================================================================
 
-.. image:: https://travis-ci.org/wolever/pprintpp.svg?branch=master
-    :target: https://travis-ci.org/wolever/pprintpp
-
-Now with Python 3 support!
-
 Installation
 ------------
 
 
-``pprint++`` can be installed with Python 2 or Python 3 using ``pip`` or
-``easy_install``::
+``pprint++`` can be installed using ``pip`` or ``easy_install``::
 
     $ pip install pprintpp
     - OR -
@@ -42,14 +36,14 @@ Usage
 3. As an `ipython <https://github.com/ipython/ipython>`_ extension::
 
     In [1]: %load_ext pprintpp
-   
+
    This will use pprintpp for ipython's output.
-   
+
    To load this extension when ipython starts, put the previous line in your `startup file <https://ipython.org/ipython-doc/1/config/overview.html#startup-files>`_.
-   
+
    You can change the indentation level like so::
-    
-    In [2]: %config PPrintPP.indentation = 4 
+
+    In [2]: %config PPrintPP.indentation = 4
 
 4. To monkeypatch ``pprint``::
 
@@ -218,7 +212,7 @@ Without ``printpp``::
     >>> pprint.pprint(["Hello", np.array([[1,2],[3,4]])])
     ['Hello', array([[1, 2],
            [3, 4]])]
-    >>> tweet = {'coordinates': None, 'created_at': 'Mon Jun 27 19:32:19 +0000 2011', 'entities': {'hashtags': [], 'urls': [{'display_url': 'tumblr.com/xnr37hf0yz', 'expanded_url': 'http://tumblr.com/xnr37hf0yz', 'indices': [107, 126], 'url': 'http://t.co/cCIWIwg'}], 'user_mentions': []}, 'place': None, 'source': '<a href="http://www.tumblr.com/" rel="nofollow">Tumblr</a>', 'truncated': False, 'user': {'contributors_enabled': True, 'default_profile': False, 'entities': {'hashtags': [], 'urls': [], 'user_mentions': []}, 'favourites_count': 20, 'id_str': '6253282', 'profile_link_color': '0094C2'}} 
+    >>> tweet = {'coordinates': None, 'created_at': 'Mon Jun 27 19:32:19 +0000 2011', 'entities': {'hashtags': [], 'urls': [{'display_url': 'tumblr.com/xnr37hf0yz', 'expanded_url': 'http://tumblr.com/xnr37hf0yz', 'indices': [107, 126], 'url': 'http://t.co/cCIWIwg'}], 'user_mentions': []}, 'place': None, 'source': '<a href="http://www.tumblr.com/" rel="nofollow">Tumblr</a>', 'truncated': False, 'user': {'contributors_enabled': True, 'default_profile': False, 'entities': {'hashtags': [], 'urls': [], 'user_mentions': []}, 'favourites_count': 20, 'id_str': '6253282', 'profile_link_color': '0094C2'}}
     >>> pprint.pprint(tweet)
     {'coordinates': None,
      'created_at': 'Mon Jun 27 19:32:19 +0000 2011',

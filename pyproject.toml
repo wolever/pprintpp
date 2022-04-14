@@ -1,0 +1,25 @@
+[tool.bandit]
+recursive = true  # TODO: fix
+
+[tool.black]
+line-length = 100
+target-version = ['py37']
+skip-string-normalization = true
+
+[tool.isort]
+known_first_party = 'pprintpp'
+profile = 'black'
+sections = 'FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER'
+
+[tool.pytest.ini_options]
+testpaths = ['tests']
+
+[tool.mypy]
+python_version = '3.7'
+warn_return_any = true
+warn_unused_configs = true
+exclude = ['pp/setup.py']
+
+[[tool.mypy.overrides]]
+module = ['IPython', 'numpy', 'traitlets.*']
+ignore_missing_imports = true

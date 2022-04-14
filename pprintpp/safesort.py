@@ -1,8 +1,6 @@
-import sys
-import textwrap
 import functools
+import textwrap
 
-PY3 = (sys.version_info >= (3, 0, 0))
 
 def memoized_property(f):
     @functools.wraps(f)
@@ -10,10 +8,13 @@ def memoized_property(f):
         val = f(self)
         self.__dict__[f.__name__] = val
         return val
+
     return property(memoized_property_helper)
 
+
 def _build_safe_cmp_func(name, cmp, prefix=""):
-    code = textwrap.dedent("""\
+    code = textwrap.dedent(
+        f"""\
         def {name}(self, other):
             try:
                 return {prefix}(self.obj {cmp} other.obj)
@@ -24,23 +25,20 @@ def _build_safe_cmp_func(name, cmp, prefix=""):
             except TypeError:
                 pass
             return {prefix}(self.verysafeobj {cmp} other.verysafeobj)
-    """).format(name=name, cmp=cmp, prefix=prefix)
+        """
+    )
     gs = ls = {}
     exec(code, gs, ls)
     return gs[name]
 
+
 class SafelySortable(object):
     def __init__(self, obj, key=None):
-        self.obj = (
-            obj if key is None else
-            key(obj)
-        )
+        self.obj = obj if key is None else key(obj)
 
     @memoized_property
     def prefix(self):
-        if PY3:
-            return tuple(t.__name__ for t in type(self.obj).__mro__)
-        return type(self.obj).__mro__
+        return tuple(t.__name__ for t in type(self.obj).__mro__)
 
     @memoized_property
     def safeobj(self):
@@ -68,6 +66,5 @@ class SafelySortable(object):
 
 
 def safesort(input, key=None, reverse=False):
-    """ Safely sort heterogeneous collections. """
-    # TODO: support cmp= on Py 2.x?
+    """Safely sort heterogeneous collections."""
     return sorted(input, key=lambda o: SafelySortable(o, key=key), reverse=reverse)

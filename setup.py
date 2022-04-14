@@ -14,7 +14,7 @@ except IOError:
 
 setup(
     name="pprintpp",
-    version="0.4.0",
+    version="0.5.0",
     url="https://github.com/wolever/pprintpp",
     author="David Wolever",
     author_email="david@wolever.net",
@@ -28,17 +28,21 @@ setup(
     },
     install_requires=[],
     license="BSD",
-    classifiers=[ x.strip() for x in """
-        Development Status :: 3 - Alpha
-        Environment :: Console
-        Intended Audience :: Developers
-        License :: OSI Approved :: BSD License
-        Natural Language :: English
-        Operating System :: OS Independent
-        Programming Language :: Python
-        Programming Language :: Python :: 2
-        Programming Language :: Python :: 3
-        Topic :: Software Development
-        Topic :: Utilities
-    """.split("\n") if x.strip() ],
+    classifiers=[
+        x.strip()
+        for x in """
+            Environment :: Console
+            Intended Audience :: Developers
+            License :: OSI Approved :: BSD License
+            Natural Language :: English
+            Operating System :: OS Independent
+            Programming Language :: Python
+            Programming Language :: Python :: 3
+            Topic :: Software Development
+            Topic :: Utilities
+        """.split(
+            "\n"
+        )
+        if x.strip()
+    ],
 )
