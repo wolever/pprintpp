@@ -1,80 +1,28 @@
 from __future__ import print_function
 
+import ast
 import io
 import os
-import ast
 import sys
-import warnings
 import unicodedata
+import warnings
+from collections import Counter, OrderedDict, defaultdict
 
-__all__ = [
-    "pprint", "pformat", "isreadable", "isrecursive", "saferepr",
-    "PrettyPrinter",
-]
+from .safesort import safesort
 
-
-#
-# Py2/Py3 compatibility stuff
-#
-
-try:
-    from collections import OrderedDict, defaultdict, Counter
-    _test_has_collections = True
-except ImportError:
-    # Python 2.6 doesn't have collections
-    class dummy_class(object):
-        __repr__ = object()
-    OrderedDict = defaultdict = Counter = dummy_class
-    _test_has_collections = False
+__all__ = ["pprint", "pformat", "isreadable", "isrecursive", "saferepr", "PrettyPrinter"]
 
 
-PY3 = sys.version_info >= (3, 0, 0)
-BytesType = bytes
-TextType = str if PY3 else unicode
-u_prefix = '' if PY3 else 'u'
+def chr_to_ascii(c):
+    return ascii(c)[1:-1]
 
 
-if PY3:
-    # Import builins explicitly to keep Py2 static analyzers happy
-    import builtins
-    chr_to_ascii = lambda x: builtins.ascii(x)[1:-1]
-    unichr = chr
-    from .safesort import safesort
-    _iteritems = lambda x: x.items()
-else:
-    chr_to_ascii = lambda x: repr(x)[2:-1]
-    safesort = sorted
-    _iteritems = lambda x: x.iteritems()
-
-
-def _sorted_py2(iterable):
-    with warnings.catch_warnings():
-        if getattr(sys, "py3kwarning", False):
-            warnings.filterwarnings("ignore", "comparing unequal types "
-                                    "not supported", DeprecationWarning)
-        return sorted(iterable)
-
-def _sorted_py3(iterable):
+def _sorted(iterable):
     try:
         return sorted(iterable)
     except TypeError:
         return safesort(iterable)
 
-_sorted = PY3 and _sorted_py3 or _sorted_py3
-
-if hasattr(TextType, 'isascii'):  # Python>=3.7
-    _isascii = TextType.isascii
-else:
-    def _isascii(text):
-        try:
-            text.encode('ascii')
-        except UnicodeEncodeError:
-            return False
-        return True
-
-#
-# End compatibility stuff
-#
 
 class TextIO(io.TextIOWrapper):
     def __init__(self, encoding=None):
@@ -93,73 +41,81 @@ class TextIO(io.TextIOWrapper):
 # ambiguous are repr'd, others will be printed. I made this table mostly by
 # hand, mostly guessing, so please file bugs.
 # Source: http://www.unicode.org/reports/tr44/#GC_Values_Table
+# fmt: off
 unicode_printable_categories = {
-    "Lu": 1, # Uppercase_Letter	an uppercase letter
-    "Ll": 1, # Lowercase_Letter	a lowercase letter
-    "Lt": 1, # Titlecase_Letter	a digraphic character, with first part uppercase
-    "LC": 1, # Cased_Letter	Lu | Ll | Lt
-    "Lm": 0, # Modifier_Letter	a modifier letter
-    "Lo": 1, # Other_Letter	other letters, including syllables and ideographs
-    "L":  1, # Letter	Lu | Ll | Lt | Lm | Lo
-    "Mn": 0, # Nonspacing_Mark	a nonspacing combining mark (zero advance width)
-    "Mc": 0, # Spacing_Mark	a spacing combining mark (positive advance width)
-    "Me": 0, # Enclosing_Mark	an enclosing combining mark
-    "M":  1, # Mark	Mn | Mc | Me
-    "Nd": 1, # Decimal_Number	a decimal digit
-    "Nl": 1, # Letter_Number	a letterlike numeric character
-    "No": 1, # Other_Number	a numeric character of other type
-    "N":  1, # Number	Nd | Nl | No
-    "Pc": 1, # Connector_Punctuation	a connecting punctuation mark, like a tie
-    "Pd": 1, # Dash_Punctuation	a dash or hyphen punctuation mark
-    "Ps": 1, # Open_Punctuation	an opening punctuation mark (of a pair)
-    "Pe": 1, # Close_Punctuation	a closing punctuation mark (of a pair)
-    "Pi": 1, # Initial_Punctuation	an initial quotation mark
-    "Pf": 1, # Final_Punctuation	a final quotation mark
-    "Po": 1, # Other_Punctuation	a punctuation mark of other type
-    "P":  1, # Punctuation	Pc | Pd | Ps | Pe | Pi | Pf | Po
-    "Sm": 1, # Math_Symbol	a symbol of mathematical use
-    "Sc": 1, # Currency_Symbol	a currency sign
-    "Sk": 1, # Modifier_Symbol	a non-letterlike modifier symbol
-    "So": 1, # Other_Symbol	a symbol of other type
-    "S":  1, # Symbol	Sm | Sc | Sk | So
-    "Zs": 0, # Space_Separator	a space character (of various non-zero widths)
-    "Zl": 0, # Line_Separator	U+2028 LINE SEPARATOR only
-    "Zp": 0, # Paragraph_Separator	U+2029 PARAGRAPH SEPARATOR only
-    "Z":  1, # Separator	Zs | Zl | Zp
-    "Cc": 0, # Control	a C0 or C1 control code
-    "Cf": 0, # Format	a format control character
-    "Cs": 0, # Surrogate	a surrogate code point
-    "Co": 0, # Private_Use	a private-use character
-    "Cn": 0, # Unassigned	a reserved unassigned code point or a noncharacter
-    "C":  0, # Other	Cc | Cf | Cs | Co | Cn
+    "Lu": 1,  # Uppercase_Letter	an uppercase letter
+    "Ll": 1,  # Lowercase_Letter	a lowercase letter
+    "Lt": 1,  # Titlecase_Letter	a digraphic character, with first part uppercase
+    "LC": 1,  # Cased_Letter	Lu | Ll | Lt
+    "Lm": 0,  # Modifier_Letter	a modifier letter
+    "Lo": 1,  # Other_Letter	other letters, including syllables and ideographs
+    "L":  1,  # Letter	Lu | Ll | Lt | Lm | Lo
+    "Mn": 0,  # Nonspacing_Mark	a nonspacing combining mark (zero advance width)
+    "Mc": 0,  # Spacing_Mark	a spacing combining mark (positive advance width)
+    "Me": 0,  # Enclosing_Mark	an enclosing combining mark
+    "M":  1,  # Mark	Mn | Mc | Me
+    "Nd": 1,  # Decimal_Number	a decimal digit
+    "Nl": 1,  # Letter_Number	a letterlike numeric character
+    "No": 1,  # Other_Number	a numeric character of other type
+    "N":  1,  # Number	Nd | Nl | No
+    "Pc": 1,  # Connector_Punctuation	a connecting punctuation mark, like a tie
+    "Pd": 1,  # Dash_Punctuation	a dash or hyphen punctuation mark
+    "Ps": 1,  # Open_Punctuation	an opening punctuation mark (of a pair)
+    "Pe": 1,  # Close_Punctuation	a closing punctuation mark (of a pair)
+    "Pi": 1,  # Initial_Punctuation	an initial quotation mark
+    "Pf": 1,  # Final_Punctuation	a final quotation mark
+    "Po": 1,  # Other_Punctuation	a punctuation mark of other type
+    "P":  1,  # Punctuation	Pc | Pd | Ps | Pe | Pi | Pf | Po
+    "Sm": 1,  # Math_Symbol	a symbol of mathematical use
+    "Sc": 1,  # Currency_Symbol	a currency sign
+    "Sk": 1,  # Modifier_Symbol	a non-letterlike modifier symbol
+    "So": 1,  # Other_Symbol	a symbol of other type
+    "S":  1,  # Symbol	Sm | Sc | Sk | So
+    "Zs": 0,  # Space_Separator	a space character (of various non-zero widths)
+    "Zl": 0,  # Line_Separator	U+2028 LINE SEPARATOR only
+    "Zp": 0,  # Paragraph_Separator	U+2029 PARAGRAPH SEPARATOR only
+    "Z":  1,  # Separator	Zs | Zl | Zp
+    "Cc": 0,  # Control	a C0 or C1 control code
+    "Cf": 0,  # Format	a format control character
+    "Cs": 0,  # Surrogate	a surrogate code point
+    "Co": 0,  # Private_Use	a private-use character
+    "Cn": 0,  # Unassigned	a reserved unassigned code point or a noncharacter
+    "C":  0,  # Other	Cc | Cf | Cs | Co | Cn
 }
+# fmt: on
 
-ascii_table = dict(
-    (unichr(i), chr_to_ascii(unichr(i)))
-    for i in range(255)
-)
+ascii_table = dict((chr(i), chr_to_ascii(chr(i))) for i in range(255))
 
-def pprint(object, stream=None, indent=4, width=80, depth=None):
+
+def pprint(object, stream=None, indent=4, width=80, depth=None, sort_dicts=True):
     """Pretty-print a Python object to a stream [default is sys.stdout]."""
     printer = PrettyPrinter(
-        stream=stream, indent=indent, width=width, depth=depth)
+        stream=stream, indent=indent, width=width, depth=depth, sort_dicts=sort_dicts
+    )
     printer.pprint(object)
 
-def pformat(object, indent=4, width=80, depth=None):
+
+def pformat(object, indent=4, width=80, depth=None, sort_dicts=True):
     """Format a Python object into a pretty-printed representation."""
-    return PrettyPrinter(indent=indent, width=width, depth=depth).pformat(object)
+    return PrettyPrinter(indent=indent, width=width, depth=depth, sort_dicts=sort_dicts).pformat(
+        object
+    )
+
 
 def saferepr(object):
     """Version of repr() which can handle recursive data structures."""
     return PrettyPrinter().pformat(object)
 
+
 def isreadable(object):
     """Determine if saferepr(object) is readable by eval()."""
     return PrettyPrinter().isreadable(object)
 
+
 def isrecursive(object):
     """Determine if object requires a recursive representation."""
     return PrettyPrinter().isrecursive(object)
+
 
 def console(argv=None):
     if argv is None:
@@ -168,21 +124,23 @@ def console(argv=None):
         name = argv[0]
         if name.startswith("/"):
             name = os.path.basename(name)
-        print("Usage: %s" %(argv[0], ))
+        print("Usage: %s" % (argv[0],))
         print()
-        print("Pipe Python literals into %s to pretty-print them" %(argv[0], ))
+        print("Pipe Python literals into %s to pretty-print them" % (argv[0],))
         return 1
     obj = ast.literal_eval(sys.stdin.read().strip())
     pprint(obj)
     return 0
 
+
 def monkeypatch(mod=None, quiet=False):
     if "pprint" in sys.modules and not quiet:
-        warnings.warn("'pprint' has already been imported; monkeypatching "
-                      "won't work everywhere.")
+        warnings.warn("'pprint' has already been imported; monkeypatching won't work everywhere.")
     import pprint
+
     sys.modules["pprint_original"] = pprint
     sys.modules["pprint"] = mod or sys.modules["pprintpp"]
+
 
 class PPrintSharedState(object):
     recursive = False
@@ -200,6 +158,7 @@ class PPrintState(object):
     level = 0
     max_width = 80
     max_depth = None
+    sort_dicts = True
     stream = None
     context = None
     write_constrain = None
@@ -236,7 +195,7 @@ class PPrintState(object):
             if self.write_constrain < 0:
                 raise self.WriteConstrained
 
-        if isinstance(data, BytesType):
+        if isinstance(data, bytes):
             data = data.decode("latin1")
         self.stream.write(data)
         nl_idx = data.rfind("\n")
@@ -248,30 +207,34 @@ class PPrintState(object):
     def get_indent_string(self):
         return (self.level * self.indent) * " "
 
+
 def _mk_open_close_empty_dict(type_tuples):
-    """ Generates a dictionary mapping either ``cls.__repr__`` xor ``cls`` to
-        a tuple of ``(container_type, repr_open, repr_close, repr_empty)`` (see
-        ``PrettyPrinter._open_close_empty`` for examples).
+    """
+    Generates a dictionary mapping either ``cls.__repr__`` xor ``cls`` to
+    a tuple of ``(container_type, repr_open, repr_close, repr_empty)`` (see
+    ``PrettyPrinter._open_close_empty`` for examples).
 
-        Using either ``cls.__repr__`` xor ``cls`` is important because some
-        types (specifically, ``set`` and ``frozenset`` on PyPy) share a
-        ``__repr__``. When we are determining how to repr an object, the type
-        is first checked, then if it's not found ``type.__repr__`` is checked.
+    Using either ``cls.__repr__`` xor ``cls`` is important because some
+    types (specifically, ``set`` and ``frozenset`` on PyPy) share a
+    ``__repr__``. When we are determining how to repr an object, the type
+    is first checked, then if it's not found ``type.__repr__`` is checked.
 
-        Note that ``__repr__`` is used so that trivial subclasses will behave
-        sensibly. """
+    Note that ``__repr__`` is used so that trivial subclasses will behave
+    sensibly."""
 
     res = {}
     for (cls, open_close_empty) in type_tuples:
         if cls.__repr__ in res:
-            res[cls] = (cls, ) + open_close_empty
+            res[cls] = (cls,) + open_close_empty
         else:
-            res[cls.__repr__] = (cls, ) + open_close_empty
+            res[cls.__repr__] = (cls,) + open_close_empty
     return res
 
+
 class PrettyPrinter(object):
-    def __init__(self, indent=4, width=80, depth=None, stream=None):
-        """Handle pretty printing operations onto a stream using a set of
+    def __init__(self, indent=4, width=80, depth=None, stream=None, sort_dicts=True):
+        """
+        Handle pretty printing operations onto a stream using a set of
         configured parameters.
 
         indent
@@ -287,10 +250,16 @@ class PrettyPrinter(object):
             The desired output stream.  If omitted (or false), the standard
             output stream available at construction will be used.
 
+        sort_dicts
+            If `True`, dictionaries will be formatted with their keys sorted,
+            otherwise they will display in the order as returned by `items`
+            method.
+
         """
         self.get_default_state = lambda: PPrintState(
             indent=int(indent),
             max_width=int(width),
+            sort_dicts=sort_dicts,
             stream=stream or sys.stdout,
             context={},
         )
@@ -318,16 +287,18 @@ class PrettyPrinter(object):
         self._format(object, state)
         return state.s.readable and not state.s.recursive
 
-    _open_close_empty = _mk_open_close_empty_dict([
-        (dict, ("dict", "{", "}", "{}")),
-        (list, ("list", "[", "]", "[]")),
-        (tuple, ("tuple", "(", ")", "()")),
-        (set, ("set", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
-        (frozenset, ("set", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
-        (Counter, ("dict", "__PP_TYPE__({", "})", "__PP_TYPE__()")),
-        (defaultdict, ("dict", None, "})", None)),
-        (OrderedDict, ("odict", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
-    ])
+    _open_close_empty = _mk_open_close_empty_dict(
+        [
+            (dict, ("dict", "{", "}", "{}")),
+            (list, ("list", "[", "]", "[]")),
+            (tuple, ("tuple", "(", ")", "()")),
+            (set, ("set", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
+            (frozenset, ("set", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
+            (Counter, ("dict", "__PP_TYPE__({", "})", "__PP_TYPE__()")),
+            (defaultdict, ("dict", None, "})", None)),
+            (OrderedDict, ("odict", "__PP_TYPE__([", "])", "__PP_TYPE__()")),
+        ]
+    )
 
     def _format_nested_objects(self, object, state, typeish=None):
         objid = id(object)
@@ -338,12 +309,9 @@ class PrettyPrinter(object):
             # that it takes three characters to close the object (ex, `]),`)
             oneline_state = state.clone(clone_shared=True)
             oneline_state.stream = TextIO()
-            oneline_state.write_constrain = (
-                state.max_width - state.s.cur_line_length - 3
-            )
+            oneline_state.write_constrain = state.max_width - state.s.cur_line_length - 3
             try:
-                self._write_nested_real(object, oneline_state, typeish,
-                                        oneline=True)
+                self._write_nested_real(object, oneline_state, typeish, oneline=True)
                 oneline_value = oneline_state.stream.getvalue()
                 if "\n" in oneline_value:
                     oneline_value = None
@@ -363,7 +331,11 @@ class PrettyPrinter(object):
         first = True
         joiner = oneline and ", " or ",\n" + indent_str
         if typeish == "dict":
-            for k, v in _sorted(object.items()):
+            items = object.items()
+            if state.sort_dicts:
+                items = _sorted(items)
+
+            for k, v in items:
                 if first:
                     first = False
                 else:
@@ -372,7 +344,7 @@ class PrettyPrinter(object):
                 state.write(": ")
                 self._format(v, state)
         elif typeish == "odict":
-            for k, v in _iteritems(object):
+            for k, v in object.items():
                 if first:
                     first = False
                 else:
@@ -412,10 +384,7 @@ class PrettyPrinter(object):
         # Note: see comments on _mk_open_close_empty_dict for the rational
         # behind looking up based first on type then on __repr__.
         try:
-            opener_closer_empty = (
-                self._open_close_empty.get(typ) or
-                self._open_close_empty.get(r)
-            )
+            opener_closer_empty = self._open_close_empty.get(typ) or self._open_close_empty.get(r)
         except TypeError:
             # This will happen if the type or the __repr__ is unhashable.
             # See: https://github.com/wolever/pprintpp/issues/18
@@ -428,11 +397,11 @@ class PrettyPrinter(object):
                     opener = "__PP_TYPE__(" + opener
                     closer = closer + ")"
                 if empty is not None and "__PP_TYPE__" not in empty:
-                    empty = "__PP_TYPE__(%s)" %(empty, )
+                    empty = "__PP_TYPE__(%s)" % (empty,)
 
             if r == defaultdict.__repr__:
                 factory_repr = object.default_factory
-                opener = "__PP_TYPE__(%r, {" %(factory_repr, )
+                opener = "__PP_TYPE__(%r, {" % (factory_repr,)
                 empty = opener + closer
 
             length = len(object)
@@ -449,12 +418,12 @@ class PrettyPrinter(object):
             write(closer)
             return
 
-        if r == BytesType.__repr__:
+        if r == bytes.__repr__:
             write(repr(object))
             return
 
-        if r == TextType.__repr__:
-            if _isascii(object):  # Optimalization
+        if r == str.__repr__:
+            if str.isascii(object):  # Optimalization
                 write(repr(object))
                 return
             if "'" in object and '"' not in object:
@@ -466,7 +435,7 @@ class PrettyPrinter(object):
             qget = quotes.get
             ascii_table_get = ascii_table.get
             unicat_get = unicodedata.category
-            write(u_prefix + quote)
+            write(quote)
             for char in object:
                 if ord(char) > 0x7F:
                     cat = unicat_get(char)
@@ -476,26 +445,18 @@ class PrettyPrinter(object):
                             continue
                         except UnicodeEncodeError:
                             pass
-                write(
-                    qget(char) or
-                    ascii_table_get(char) or
-                    chr_to_ascii(char)
-                )
+                write(qget(char) or ascii_table_get(char) or chr_to_ascii(char))
             write(quote)
             return
 
         orepr = repr(object)
         orepr = orepr.replace("\n", "\n" + state.get_indent_string())
-        state.s.readable = (
-            state.s.readable and
-            not orepr.startswith("<")
-        )
+        state.s.readable = state.s.readable and not orepr.startswith("<")
         write(orepr)
         return
 
     def _repr(self, object, context, level):
-        repr, readable, recursive = self.format(object, context.copy(),
-                                                self._depth, level)
+        repr, readable, recursive = self.format(object, context.copy(), self._depth, level)
         if not readable:
             self._readable = False
         if recursive:
@@ -513,59 +474,63 @@ class PrettyPrinter(object):
 
     def _recursion(self, object, state):
         state.s.recursive = True
-        return ("<Recursion on %s with id=%s>"
-                % (type(object).__name__, id(object)))
+        return "<Recursion on %s with id=%s>" % (type(object).__name__, id(object))
 
 
 if __name__ == "__main__":
     try:
         import numpy as np
     except ImportError:
-        class np(object):
+
+        class np(object):  # type: ignore
             @staticmethod
             def array(o):
                 return o
 
-    somelist = [1,2,3]
-    recursive = []
+    somelist = [1, 2, 3]
+    recursive = []  # type: ignore  # TODO: Add type hinting for mypy
     recursive.extend([recursive, recursive, recursive])
-    pprint({
-        "a": {"a": "b"},
-        "b": [somelist, somelist],
-        "c": [
-            (1, ),
-            (1,2,3),
-        ],
-        "ordereddict": OrderedDict([
-            (1, 1),
-            (10, 10),
-            (2, 2),
-            (11, 11)
-        ]),
-        "counter": [
-            Counter(),
-            Counter("asdfasdfasdf"),
-        ],
-        "dd": [
-            defaultdict(int, {}),
-            defaultdict(int, {"foo": 42}),
-        ],
-        "frozenset": frozenset("abc"),
-        "np": [
-            "hello",
-            #np.array([[1,2],[3,4]]),
-            "world",
-        ],
-        u"u": ["a", u"\u1234", "b"],
-        "recursive": recursive,
-        "z": {
-            "very very very long key stuff 1234": {
-                "much value": "very nest! " * 10,
-                u"unicode": u"4U!'\"",
+    pprint(
+        {
+            "a": {"a": "b"},
+            "b": [somelist, somelist],
+            "c": [
+                (1,),
+                (1, 2, 3),
+            ],
+            "ordereddict": OrderedDict(
+                [
+                    (1, 1),
+                    (10, 10),
+                    (2, 2),
+                    (11, 11),
+                ]
+            ),
+            "counter": [
+                Counter(),
+                Counter("asdfasdfasdf"),
+            ],
+            "dd": [
+                defaultdict(int, {}),
+                defaultdict(int, {"foo": 42}),
+            ],
+            "frozenset": frozenset("abc"),
+            "np": [
+                "hello",
+                # np.array([[1,2],[3,4]]),
+                "world",
+            ],
+            u"u": ["a", u"\u1234", "b"],
+            "recursive": recursive,
+            "z": {
+                "very very very long key stuff 1234": {
+                    "much value": "very nest! " * 10,
+                    u"unicode": u"4U!'\"",
+                },
+                "aldksfj alskfj askfjas fkjasdlkf jasdlkf ajslfjas": ["asdf"] * 10,
             },
-            "aldksfj alskfj askfjas fkjasdlkf jasdlkf ajslfjas": ["asdf"] * 10,
-        },
-    })
+        }
+    )
     pprint(u"\xe9e\u0301")
     uni_safe = u"\xe9 \u6f02 \u0e4f \u2661"
     uni_unsafe = u"\u200a \u0301 \n"
@@ -579,9 +544,11 @@ if __name__ == "__main__":
 
 def load_ipython_extension(ipython):
     from .ipython import load_ipython_extension
+
     return load_ipython_extension(ipython)
 
 
 def unload_ipython_extension(ipython):
     from .ipython import unload_ipython_extension
+
     return unload_ipython_extension(ipython)

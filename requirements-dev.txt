@@ -1,0 +1,8 @@
+-r requirements-test.txt
+bandit  # Always want latest
+black==22.3.0
+flake8==4.0.1
+isort==5.10.1
+mypy==0.942
+safety  # Always want latest
+types-setuptools == 57.4.12

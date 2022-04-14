@@ -9,11 +9,10 @@ and answered by:
 https://stackoverflow.com/users/1530134/kupiakos
 """
 import IPython
-from traitlets.config import Configurable
 from traitlets import Int
+from traitlets.config import Configurable
 
 from . import pformat
-
 
 original_representation = IPython.lib.pretty.RepresentationPrinter
 DEFAULT_INDENTATION = 2
@@ -30,7 +29,8 @@ def unload_ipython_extension(ipython):
     IPython.lib.pretty.RepresentationPrinter = original_representation
     try:
         pprintpp = [
-            configurable for configurable in ipython.configurables
+            configurable
+            for configurable in ipython.configurables
             if isinstance(configurable, PPrintPP)
         ][0]
     except IndexError:
@@ -60,4 +60,5 @@ class PPrintPP(Configurable):
     """
     PPrintPP configuration
     """
+
     indentation = Int(config=True)

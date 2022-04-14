@@ -10,12 +10,12 @@ os.chdir(os.path.dirname(sys.argv[0]) or ".")
 try:
     long_description = open("README.rst", "U").read()
 except IOError:
-    long_description = "See https://github.com/wolever/pprintpp"
+    long_description = "See https://github.com/joaonc/pprintpp2"
 
 setup(
     name="pprintpp",
     version="0.4.0",
-    url="https://github.com/wolever/pprintpp",
+    url="https://github.com/joaonc/pprintpp2",
     author="David Wolever",
     author_email="david@wolever.net",
     description="A drop-in replacement for pprint that's actually pretty",
@@ -28,7 +28,9 @@ setup(
     },
     install_requires=[],
     license="BSD",
-    classifiers=[ x.strip() for x in """
+    classifiers=[
+        x.strip()
+        for x in """
         Development Status :: 3 - Alpha
         Environment :: Console
         Intended Audience :: Developers
@@ -36,9 +38,12 @@ setup(
         Natural Language :: English
         Operating System :: OS Independent
         Programming Language :: Python
-        Programming Language :: Python :: 2
         Programming Language :: Python :: 3
         Topic :: Software Development
         Topic :: Utilities
-    """.split("\n") if x.strip() ],
+    """.split(
+            "\n"
+        )
+        if x.strip()
+    ],
 )
