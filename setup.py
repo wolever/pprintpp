@@ -8,7 +8,7 @@ from setuptools import setup
 os.chdir(os.path.dirname(sys.argv[0]) or ".")
 
 try:
-    long_description = open("README.rst", "U").read()
+    long_description = open("README.rst").read()
 except IOError:
     long_description = "See https://github.com/wolever/pprintpp"
 
